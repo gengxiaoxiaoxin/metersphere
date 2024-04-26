@@ -6,7 +6,7 @@ export default {
   'apiScenario.tree.selectorPlaceholder': '请输入模块名称进行搜索',
   'apiScenario.tree.folder.allScenario': '全部场景',
   'apiScenario.tree.recycleBin': '回收站',
-  'apiScenario.tree.noMatchModule': '暂无匹配的模块/场景',
+  'apiScenario.tree.noMatchModule': '暂无匹配的模块',
   'apiScenario.createSubModule': '新建子模块',
   'apiScenario.module.deleteTipTitle': '是否删除 {name} 模块？',
   'apiScenario.module.deleteTipContent': '删除后，会同步删除模块下的所有场景，请谨慎操作.',
@@ -254,4 +254,6 @@ export default {
   'apiScenario.schedule.table.tooltip.disable': '定时任务未开启',
   'apiScenario.save.env': '场景保存的环境',
   'apiScenario.execute.no.step.tips': '没有开启的步骤',
+  'apiScenario.preConditionTip': '在场景步骤前分别执行一次',
+  'apiScenario.postConditionTip': '在场景步骤后分别执行一次',
 };

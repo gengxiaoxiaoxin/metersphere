@@ -12,15 +12,15 @@
   import { getOrgOptions, switchUserOrg } from '@/api/modules/system';
   import { useI18n } from '@/hooks/useI18n';
   import useUser from '@/hooks/useUser';
-  import { BOTTOM_MENU_LIST } from '@/router/constants';
+  import { BOTTOM_MENU_LIST, NO_PROJECT_ROUTE_NAME } from '@/router/constants';
   import { useAppStore, useUserStore } from '@/store';
   import useLicenseStore from '@/store/modules/setting/license';
   import { openWindow, regexUrl } from '@/utils';
   import { scrollIntoView } from '@/utils/dom';
-  import { getFisrtRouterNameByCurrentRoute } from '@/utils/permission';
+  import { getFirstRouterNameByCurrentRoute } from '@/utils/permission';
   import { listenerRouteChange } from '@/utils/route-listener';
 
-  import { SettingRouteEnum } from '@/enums/routeEnum';
+  import { ProjectManagementRouteEnum, SettingRouteEnum } from '@/enums/routeEnum';
 
   import useMenuTree from './use-menu-tree';
   import type { RouteMeta } from 'vue-router';
@@ -66,7 +66,7 @@
           }
           if (item.meta?.hideChildrenInMenu) {
             // 顶级菜单路由跳转到该菜单下有权限的第一个顶部子菜单
-            const childName = getFisrtRouterNameByCurrentRoute(item.name as string);
+            const childName = getFirstRouterNameByCurrentRoute(item.name as string);
             router.push({
               name: childName,
             });
@@ -148,14 +148,34 @@
           personalMenusVisible.value = false;
           orgKeyword.value = '';
           await userStore.isLogin(true);
-          router.replace({
-            path: route.path,
-            query: {
-              ...route.query,
-              orgId: appStore.currentOrgId,
-              pId: appStore.currentProjectId,
-            },
-          });
+          if (!appStore.currentProjectId || appStore.currentProjectId === 'no_such_project') {
+            // 没有项目权限(组织没有项目, 或项目全被禁用)
+            router.push({
+              name: NO_PROJECT_ROUTE_NAME,
+            });
+            return;
+          }
+          if (route.name === NO_PROJECT_ROUTE_NAME) {
+            // 无项目权限组织切换到正常组织, 默认跳转到项目基本信息页面
+            router.replace({
+              name: ProjectManagementRouteEnum.PROJECT_MANAGEMENT_PERMISSION_BASIC_INFO,
+              query: {
+                ...route.query,
+                orgId: appStore.currentOrgId,
+                pId: appStore.currentProjectId,
+              },
+            });
+          } else {
+            // 正常切换组织
+            router.replace({
+              path: route.path,
+              query: {
+                ...route.query,
+                orgId: appStore.currentOrgId,
+                pId: appStore.currentProjectId,
+              },
+            });
+          }
         } catch (error) {
           // eslint-disable-next-line no-console
           console.log(error);
@@ -165,7 +185,7 @@
       const isActiveSwitchOrg = ref(false);
       const personalMenus = ref([
         {
-          label: t('personal.info'),
+          label: t('personal.center'),
           icon: <MsIcon type="icon-icon-contacts" class="text-[var(--color-text-4)]" />,
           event: () => {
             personalDrawerVisible.value = true;
@@ -492,7 +512,7 @@
     .arco-menu-inner {
       @apply flex flex-col justify-between;
 
-      padding: 16px 28px 16px 16px !important;
+      padding: 16px !important;
       .arco-menu-inline {
         &--bottom {
           @apply mt-auto;
@@ -566,7 +586,7 @@
     min-width: 60px;
   }
   .arco-menu-collapsed {
-    width: 86px;
+    width: 72px;
     .arco-avatar,
     .arco-icon {
       margin-right: 2px !important;
@@ -581,8 +601,8 @@
     .arco-menu-collapse-button {
       @apply hidden rounded-full;
 
-      top: 22px;
-      right: 4px;
+      top: 24px;
+      right: -12px;
       border: 1px solid #ffffff;
       background: linear-gradient(90deg, rgb(var(--primary-9)) 3.36%, #ffffff 100%);
       box-shadow: 0 0 7px rgb(15 0 78 / 9%);

@@ -1511,6 +1511,12 @@ public class BugService {
             BugPageRequest bugPageRequest = new BugPageRequest();
             BeanUtils.copyBean(bugPageRequest, request);
             bugPageRequest.setUseTrash(false);
+            if (request.getCondition() != null) {
+                bugPageRequest.setCombine(request.getCondition().getCombine());
+                bugPageRequest.setFilter(request.getCondition().getFilter());
+                bugPageRequest.setSearchMode(request.getCondition().getSearchMode());
+                bugPageRequest.setKeyword(request.getCondition().getKeyword());
+            }
             List<BugDTO> allBugs = extBugMapper.list(bugPageRequest, request.getSort());
             if (CollectionUtils.isNotEmpty(request.getExcludeIds())) {
                 allBugs.removeIf(bug -> request.getExcludeIds().contains(bug.getId()));
@@ -1538,9 +1544,10 @@ public class BugService {
             if (request.getCondition() != null) {
                 bugPageRequest.setCombine(request.getCondition().getCombine());
                 bugPageRequest.setFilter(request.getCondition().getFilter());
+                bugPageRequest.setSearchMode(request.getCondition().getSearchMode());
+                bugPageRequest.setKeyword(request.getCondition().getKeyword());
             }
             List<String> ids = extBugMapper.getIdsByPageRequest(bugPageRequest);
-            ids.addAll(request.getSelectIds());
             if (CollectionUtils.isNotEmpty(request.getExcludeIds())) {
                 ids.removeIf(id -> request.getExcludeIds().contains(id));
             }

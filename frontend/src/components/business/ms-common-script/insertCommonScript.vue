@@ -21,7 +21,7 @@
       </a-button>
       <a-input-search
         v-model:model-value="keyword"
-        :placeholder="t('project.menu.nameSearch')"
+        :placeholder="t('apiScenario.params.searchPlaceholder')"
         allow-clear
         class="mx-[8px] w-[240px]"
         @search="searchList"
@@ -34,15 +34,15 @@
       <template #name="{ record }">
         <div class="flex items-center">
           <a-tooltip :content="record.name">
-            <div class="one-line-text max-w-[200px] cursor-pointer text-[rgb(var(--primary-5))]">{{ record.name }}</div>
+            <div class="one-line-text max-w-[200px] cursor-pointer text-[rgb(var(--primary-5))]">{{
+              characterLimit(record.name)
+            }}</div>
           </a-tooltip>
           <a-popover :title="record.name" position="bottom">
             <a-button type="text" class="ml-2 px-0"> {{ t('project.commonScript.preview') }}</a-button>
             <template #title>
               <div class="w-[436px] bg-[var(--color-bg-3)] px-2 pb-2">
-                <span style="word-break: break-all">
-                  {{ record.name }}
-                </span>
+                <span style="word-break: break-all"> {{ characterLimit(record.name) }} </span>
               </div>
             </template>
             <template #content>
@@ -141,7 +141,6 @@
     v-model:params="paramsList"
     :confirm-loading="confirmLoading"
     :script-id="isEditId"
-    ok-text="project.commonScript.apply"
     :enable-radio-selected="radioSelected"
     @save="saveHandler"
   />
@@ -169,6 +168,7 @@
   } from '@/api/modules/project-management/commonScript';
   import { useI18n } from '@/hooks/useI18n';
   import useAppStore from '@/store/modules/app';
+  import { characterLimit } from '@/utils';
   import { hasAnyPermission } from '@/utils/permission';
 
   import { BugOptionItem } from '@/models/bug-management';
@@ -253,6 +253,7 @@
       isTag: true,
       width: 440,
       showDrag: true,
+      tagPosition: 'tr',
     },
     {
       title: 'project.commonScript.createUser',
@@ -385,11 +386,7 @@
       await addOrUpdateCommonScriptReq(paramsObj);
       showScriptDrawer.value = false;
       initData();
-      Message.success(
-        form.status === 'DRAFT'
-          ? t('project.commonScript.saveDraftSuccessfully')
-          : t('project.commonScript.appliedSuccessfully')
-      );
+      Message.success(form.id ? t('common.updateSuccess') : t('common.createSuccess'));
     } catch (error) {
       console.log(error);
     } finally {

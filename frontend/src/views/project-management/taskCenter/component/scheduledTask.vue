@@ -29,7 +29,7 @@
         <div
           v-if="props.moduleType === TaskCenterEnum.API_SCENARIO"
           type="text"
-          class="one-line-text flex w-full"
+          class="one-line-text w-full"
           :class="[hasJumpPermission ? 'text-[rgb(var(--primary-5))]' : '']"
           @click="showDetail(record.resourceId)"
           >{{ record.resourceNum }}
@@ -38,8 +38,7 @@
       <template #resourceName="{ record }">
         <div
           v-if="props.moduleType === TaskCenterEnum.API_SCENARIO"
-          type="text"
-          class="one-line-text flex max-w-[300px]"
+          class="one-line-text max-w-[300px]"
           :class="[hasJumpPermission ? 'text-[rgb(var(--primary-5))]' : '']"
           @click="showDetail(record.resourceId)"
           >{{ record.resourceName }}
@@ -316,7 +315,7 @@
       dataIndex: 'operation',
       fixed: 'right',
       showDrag: false,
-      width: hasOperationPermission.value ? 180 : 100,
+      width: 180,
     },
   ];
 
@@ -369,7 +368,7 @@
     // eslint-disable-next-line no-return-assign
     (item) => ({
       ...item,
-      nextTime: dayjs(item.nextTime).format('YYYY-MM-DD HH:mm:ss'),
+      nextTime: item.nextTime ? dayjs(item.nextTime).format('YYYY-MM-DD HH:mm:ss') : null,
     })
   );
 

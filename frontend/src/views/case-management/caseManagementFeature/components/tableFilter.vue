@@ -1,6 +1,11 @@
 <template>
   <a-trigger v-model:popup-visible="innerVisible" trigger="click" @popup-visible-change="handleFilterHidden">
-    <a-button type="text" class="arco-btn-text--secondary p-[8px_4px]" size="small" @click.stop="innerVisible = true">
+    <a-button
+      type="text"
+      class="arco-btn-text--secondary p-[8px_4px] text-[14px]"
+      size="mini"
+      @click.stop="innerVisible = true"
+    >
       <div class="font-medium">
         {{ t(props.title) }}
       </div>
@@ -21,8 +26,12 @@
                 :key="item[props.valueKey || 'value']"
                 :value="item[props.valueKey || 'value']"
               >
-                <a-tooltip :content="item[props.labelKey || 'text']" :mouse-enter-delay="300">
-                  <div class="one-line-text">
+                <a-tooltip
+                  :content="item[props.labelKey || 'text']"
+                  :mouse-enter-delay="300"
+                  :disabled="!item[props.labelKey || 'text']"
+                >
+                  <div class="one-line-text max-w-[120px]">
                     <slot name="item" :item="item" :index="index"></slot>
                   </div>
                 </a-tooltip>

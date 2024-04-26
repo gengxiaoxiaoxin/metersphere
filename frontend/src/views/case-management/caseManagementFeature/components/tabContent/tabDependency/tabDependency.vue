@@ -31,6 +31,7 @@
           class="mx-[8px] w-[240px]"
           @search="searchDependCase"
           @press-enter="searchDependCase"
+          @clear="searchDependCase"
         ></a-input-search>
       </div>
     </div>
@@ -126,15 +127,15 @@
       width: 300,
       ellipsis: true,
     },
-    {
-      title: 'caseManagement.featureCase.tableColumnVersion',
-      slotName: 'versionName',
-      dataIndex: 'versionName',
-      showInTable: true,
-      showTooltip: true,
-      width: 300,
-      ellipsis: true,
-    },
+    // {
+    //   title: 'caseManagement.featureCase.tableColumnVersion',
+    //   slotName: 'versionName',
+    //   dataIndex: 'versionName',
+    //   showInTable: true,
+    //   showTooltip: true,
+    //   width: 300,
+    //   ellipsis: true,
+    // },
     {
       title: 'caseManagement.featureCase.tableColumnCreateUser',
       slotName: 'userName',
@@ -234,6 +235,15 @@
   //     }
   //   }
   // );
+
+  watch(
+    () => props.caseId,
+    (val) => {
+      if (val) {
+        initData();
+      }
+    }
+  );
 
   onMounted(() => {
     initData();

@@ -10,6 +10,7 @@
       class="mx-[8px] w-[240px]"
       @search="searchCase"
       @press-enter="searchCase"
+      @clear="searchCase"
     ></a-input-search>
   </div>
   <ms-base-table v-bind="propsRes" v-on="propsEvent">
@@ -64,7 +65,6 @@
   </ms-base-table>
   <MsCaseAssociate
     v-model:visible="innerVisible"
-    v-model:project-id="innerProject"
     v-model:currentSelectCase="currentSelectCase"
     :ok-button-disabled="associateForm.reviewers.length === 0"
     :get-modules-func="getModuleTree"
@@ -103,7 +103,6 @@
     getModuleTree,
     getUnAssociatedList,
   } from '@/api/modules/bug-management';
-  import { postTabletList } from '@/api/modules/project-management/menuManagement';
   import { useI18n } from '@/hooks/useI18n';
   import { NO_RESOURCE_ROUTE_NAME } from '@/router/constants';
   import { useAppStore } from '@/store';
@@ -189,7 +188,7 @@
   const { propsRes, propsEvent, loadList, setLoadListParams, setKeyword } = useTable(getAssociatedList, {
     columns,
     scroll: { x: '100%' },
-    heightUsed: 340,
+    heightUsed: 310,
     enableDrag: false,
   });
 

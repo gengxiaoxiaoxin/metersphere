@@ -62,63 +62,92 @@
             :no-more-data="noMoreData"
             raggable
             :virtual-list-props="{
-              height: 'calc(100vh - 160px)',
+              height: 'calc(100vh - 136px)',
             }"
             @reach-bottom="handleReachBottom"
           >
             <template #item="{ item }">
-              <div v-if="item.type === 'MENTIONED_ME'" class="ms-message-item">
+              <div v-if="item.type === 'MENTIONED_ME'" class="mb-[16px] pt-[8px]">
                 <div class="flex items-center">
                   <MSAvatar v-if="item.avatar" :avatar="item.avatar" :word="item.userName" />
                   <div class="ml-[8px] flex">
-                    <div class="text-[var(--color-text-2)]">
-                      {{ item.subject }}
-                    </div>
+                    <a-tooltip :content="item.subject" :mouse-enter-delay="300">
+                      <div class="one-line-text max-w-[300px] font-medium leading-[22px] text-[var(--color-text-1)]">
+                        {{ item.subject }}
+                      </div>
+                    </a-tooltip>
                     <div class="font-medium text-[rgb(var(--primary-5))]"
                       >&nbsp;&nbsp;{{ t('ms.message.me', { var: '@' }) }}</div
                     >
                   </div>
                 </div>
                 <div class="flex items-center">
-                  <div class="text-[var(--color-text-2)]">{{ item.content.split(':')[0] }}：</div>
-                  <div v-if="item.operation.includes('DELETE')" class="text-[var(--color-text-1)]">
-                    {{ item.resourceName }}
-                  </div>
+                  <a-tooltip :content="item.content.split(':')[0]" :mouse-enter-delay="300">
+                    <div class="one-line-text ml-[8px] max-w-[300px] text-[var(--color-text-2)]"
+                      >{{ item.content.split(':')[0] }}：</div
+                    >
+                  </a-tooltip>
+
+                  <a-tooltip v-if="item.operation.includes('DELETE')" :content="item.resourceName">
+                    <div
+                      v-if="item.operation.includes('DELETE')"
+                      class="one-line-text max-w-[300px] text-[var(--color-text-1)]"
+                    >
+                      {{ item.resourceName }}
+                    </div>
+                  </a-tooltip>
                   <MsButton v-else @click="handleNameClick(item)">
                     <a-tooltip :content="item.resourceName" :mouse-enter-delay="300">
-                      <div class="one-line-text">
+                      <div class="one-line-text max-w-[300px]">
                         {{ item.resourceName }}
                       </div>
                     </a-tooltip>
                   </MsButton>
                 </div>
-                <div class="flex items-center text-[var(--color-text-4)]">
+                <div class="ml-[8px] flex items-center text-[var(--color-text-4)]">
                   {{ dayjs(item.createTime).format('YYYY-MM-DD HH:mm:ss') }}
                 </div>
               </div>
               <div v-else class="ms-message-item">
                 <MSAvatar v-if="item.avatar" :avatar="item.avatar" :word="item.userName" />
                 <div class="ml-[8px] flex flex-col">
-                  <div class="flex items-center overflow-x-hidden">
-                    <a-badge v-if="item.status === 'UNREAD'" :count="9" dot :offset="[6, -2]" class="w-full">
-                      <div class="font-medium leading-[22px] text-[var(--color-text-1)]">
-                        {{ item.subject }}
-                      </div>
+                  <div class="flex items-center">
+                    <a-badge v-if="item.status === 'UNREAD'" :count="9" dot :offset="[5, 2]">
+                      <a-tooltip :content="item.subject">
+                        <div class="one-line-text max-w-[300px] font-medium leading-[22px] text-[var(--color-text-1)]">
+                          {{ item.subject }}
+                        </div>
+                      </a-tooltip>
                     </a-badge>
                     <a-tooltip v-else-if="item.status === 'READ'" :content="item.subject">
-                      <div class="font-medium leading-[22px] text-[var(--color-text-1)]">
+                      <div class="one-line-text max-w-[300px] font-medium leading-[22px] text-[var(--color-text-1)]">
                         {{ item.subject }}
                       </div>
                     </a-tooltip>
                   </div>
                   <div class="flex items-center">
-                    <div class="text-[var(--color-text-2)]">{{ item.content.split(':')[0] }}：</div>
-                    <div v-if="item.operation.includes('DELETE')" class="text-[var(--color-text-1)]">
-                      {{ item.resourceName }}
-                    </div>
+                    <a-tooltip
+                      v-if="item.operation.includes('DELETE')"
+                      :content="item.content.split(':')[0]"
+                      :mouse-enter-delay="300"
+                    >
+                      <div class="one-line-text max-w-[300px] text-[var(--color-text-2)]"
+                        >{{ item.content.split(':')[0] }}：</div
+                      >
+                    </a-tooltip>
+                    <a-tooltip
+                      v-if="item.operation.includes('DELETE')"
+                      :content="item.resourceName"
+                      :mouse-enter-delay="300"
+                    >
+                      <div class="one-line-text max-w-[300px] text-[var(--color-text-1)]">
+                        {{ item.resourceName }}
+                      </div>
+                    </a-tooltip>
+
                     <MsButton v-else @click="handleNameClick(item)">
                       <a-tooltip :content="item.resourceName" :mouse-enter-delay="300">
-                        <div class="one-line-text">
+                        <div class="one-line-text max-w-[300px]">
                           {{ item.resourceName }}
                         </div>
                       </a-tooltip>
@@ -343,8 +372,8 @@
 
   // TODO: MessageResourceType
   const resourceTypeRouteMap: Record<string, string> = {
-    [MessageResourceType.BUG_TASK]: BugManagementRouteEnum.BUG_MANAGEMENT_DETAIL,
-    [MessageResourceType.BUG_SYNC_TASK]: BugManagementRouteEnum.BUG_MANAGEMENT_DETAIL,
+    [MessageResourceType.BUG_TASK]: BugManagementRouteEnum.BUG_MANAGEMENT_INDEX,
+    [MessageResourceType.BUG_SYNC_TASK]: BugManagementRouteEnum.BUG_MANAGEMENT_INDEX,
     [MessageResourceType.FUNCTIONAL_CASE_TASK]: CaseManagementRouteEnum.CASE_MANAGEMENT_CASE_DETAIL,
     [MessageResourceType.CASE_REVIEW_TASK]: CaseManagementRouteEnum.CASE_MANAGEMENT_REVIEW_DETAIL,
     [MessageResourceType.API_DEFINITION_TASK]: ApiTestRouteEnum.API_TEST_MANAGEMENT,
@@ -411,8 +440,9 @@
       @apply flex;
 
       padding: 8px;
+      border-radius: var(--border-radius-small);
       &:not(:last-child) {
-        margin-bottom: 16px;
+        margin-bottom: 8px;
       }
       &:hover {
         background-color: var(--color-text-n9);

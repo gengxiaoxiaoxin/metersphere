@@ -45,12 +45,10 @@
           >
             <template #title="nodeData">
               <div class="inline-flex w-full">
-                <div
-                  class="one-line-text w-[calc(100%-32px)] text-[var(--color-text-1)]"
-                  @click="setFocusKey(nodeData)"
-                  >{{ nodeData.name }}</div
-                >
-                <div class="ms-tree-node-count ml-[4px] text-[var(--color-text-4)]">({{ nodeData.count || 0 }})</div>
+                <div class="one-line-text w-full text-[var(--color-text-1)]" @click="setFocusKey(nodeData)">{{
+                  nodeData.name
+                }}</div>
+                <div class="ms-tree-node-count ml-[4px] text-[var(--color-text-brand)]">{{ nodeData.count || 0 }}</div>
               </div>
             </template>
           </MsTree>
@@ -78,6 +76,7 @@
               class="w-[200px]"
               @press-enter="searchCase"
               @search="searchCase"
+              @clear="searchCase"
             />
             <!-- TODO这个版本不做  -->
             <!-- <a-button type="outline" class="arco-btn-outline--secondary px-[8px]">
@@ -301,11 +300,11 @@
       titleSlotName: 'caseLevelFilter',
       width: 100,
     },
-    {
-      title: 'caseManagement.featureCase.tableColumnVersion',
-      slotName: 'version',
-      width: 80,
-    },
+    // {
+    //   title: 'caseManagement.featureCase.tableColumnVersion',
+    //   slotName: 'version',
+    //   width: 80,
+    // },
     {
       title: 'caseManagement.featureCase.tableColumnTag',
       dataIndex: 'tags',

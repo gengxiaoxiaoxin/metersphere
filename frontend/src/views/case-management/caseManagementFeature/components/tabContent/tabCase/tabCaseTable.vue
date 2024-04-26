@@ -18,6 +18,7 @@
         class="mx-[8px] w-[240px]"
         @search="searchCase"
         @press-enter="searchCase"
+        @clear="searchCase"
       ></a-input-search>
     </div>
     <ms-base-table v-bind="propsRes" v-on="propsEvent">
@@ -73,6 +74,7 @@
 
 <script setup lang="ts">
   import { ref } from 'vue';
+  import { debounce } from 'lodash-es';
 
   import MsButton from '@/components/pure/ms-button/index.vue';
   import MsBaseTable from '@/components/pure/ms-table/base-table.vue';
@@ -143,15 +145,15 @@
       showTooltip: true,
       width: 300,
     },
-    {
-      title: 'caseManagement.featureCase.tableColumnVersion',
-      slotName: 'versionName',
-      dataIndex: 'versionName',
-      showInTable: true,
-      showTooltip: true,
-      width: 300,
-      ellipsis: true,
-    },
+    // {
+    //   title: 'caseManagement.featureCase.tableColumnVersion',
+    //   slotName: 'versionName',
+    //   dataIndex: 'versionName',
+    //   showInTable: true,
+    //   showTooltip: true,
+    //   width: 300,
+    //   ellipsis: true,
+    // },
     {
       title: 'caseManagement.featureCase.changeType',
       slotName: 'sourceType',
@@ -268,12 +270,20 @@
     }
   }
 
-  async function searchCase() {
-    setKeyword(keyword.value);
-    await loadList();
-  }
+  const searchCase = debounce(() => {
+    getFetch();
+  }, 100);
 
-  onMounted(async () => {
+  watch(
+    () => props.caseId,
+    (val) => {
+      if (val) {
+        getFetch();
+      }
+    }
+  );
+
+  onMounted(() => {
     getFetch();
   });
 </script>

@@ -2,7 +2,7 @@
   <div class="page">
     <MsSplitBox>
       <template #first>
-        <div class="p-[24px]">
+        <div class="mr-[6px] p-[16px]">
           <!-- TODO:这个版本环境不展示默认项目环境 -->
           <!-- <div
             ><a-radio-group
@@ -26,6 +26,7 @@
               allow-clear
               @press-enter="searchData"
               @search="searchData"
+              @clear="searchData"
             />
             <!-- 全局参数-->
             <div class="p-[8px] text-[var(--color-text-4)]">
@@ -752,9 +753,8 @@
 
 <style lang="less" scoped>
   .page {
-    @apply bg-white;
+    @apply h-full bg-white;
 
-    height: calc(100vh - 88px);
     border-radius: var(--border-radius-large);
   }
   .env-item {

@@ -52,7 +52,7 @@
       <span type="text" class="one-line-text cursor-pointer px-0 text-[rgb(var(--primary-5))]">{{ record.num }}</span>
     </template>
     <template #name="{ record }">
-      <div type="text">{{ characterLimit(record.name) }}</div>
+      <div class="one-line-text">{{ characterLimit(record.name) }}</div>
     </template>
     <template #caseLevel="{ record }">
       <a-select
@@ -93,7 +93,7 @@
       >
         <a-button
           type="text"
-          class="arco-btn-text--secondary p-[8px_4px] text-[14px] leading-[22px]"
+          class="arco-btn-text--secondary p-[8px_4px] text-[14px]"
           size="mini"
           @click="executeResultFilterVisible = true"
         >
@@ -136,6 +136,7 @@
         v-model:status-filters="updateUserFilters"
         :title="(columnConfig.title as string)"
         :list="memberOptions"
+        label-key="label"
         @search="initData()"
       >
         <template #item="{ item }">
@@ -149,6 +150,7 @@
         v-model:status-filters="createUserFilters"
         :title="(columnConfig.title as string)"
         :list="memberOptions"
+        label-key="label"
         @search="initData()"
       >
         <template #item="{ item }">
@@ -168,7 +170,8 @@
       <a-trigger v-model:popup-visible="statusFilterVisible" trigger="click" @popup-visible-change="handleFilterHidden">
         <a-button
           type="text"
-          class="arco-btn-text--secondary p-[8px_4px] text-[14px] leading-[22px]"
+          class="arco-btn-text--secondary p-[8px_4px] text-[14px]"
+          size="mini"
           @click="statusFilterVisible = true"
         >
           <div class="font-medium">
@@ -222,7 +225,7 @@
     <template #moduleId="{ record }">
       <a-tree-select
         v-if="record.showModuleTree"
-        v-model="record.moduleId"
+        v-model:modelValue="record.moduleId"
         :data="caseTreeData"
         :allow-search="true"
         :field-names="{
@@ -236,12 +239,13 @@
           },
         }"
         size="mini"
+        :filter-tree-node="filterTreeNode"
         @click.stop
         @change="(value) => handleChangeModule(record, value)"
       >
         <template #tree-slot-title="node">
           <a-tooltip :content="`${node.name}`" position="tl">
-            <div class="one-line-text w-[300px] text-[var(--color-text-1)]">{{ node.name }}</div>
+            <div class="one-line-text text-[var(--color-text-1)]">{{ node.name }}</div>
           </a-tooltip>
         </template>
       </a-tree-select>
@@ -403,7 +407,7 @@
 <script setup lang="ts">
   import { ref } from 'vue';
   import { useRoute, useRouter } from 'vue-router';
-  import { Message, TableChangeExtra, TableData } from '@arco-design/web-vue';
+  import { Message, TableChangeExtra, TableData, TreeNodeData } from '@arco-design/web-vue';
 
   import { CustomTypeMaps, MsAdvanceFilter } from '@/components/pure/ms-advance-filter';
   import { FilterFormItem, FilterResult, FilterType } from '@/components/pure/ms-advance-filter/type';
@@ -458,6 +462,7 @@
     DragCase,
   } from '@/models/caseManagement/featureCase';
   import type { TableQueryParams } from '@/models/common';
+  import { ModuleTreeNode } from '@/models/common';
   import { LastExecuteResults } from '@/enums/caseEnum';
   import { CaseManagementRouteEnum } from '@/enums/routeEnum';
   import { ColumnEditTypeEnum, TableKeyEnum } from '@/enums/tableEnum';
@@ -567,7 +572,7 @@
       'title': 'caseManagement.featureCase.tableColumnID',
       'slotName': 'num',
       'dataIndex': 'num',
-      'width': 200,
+      'width': 130,
       'showInTable': true,
       'sortable': {
         sortDirections: ['ascend', 'descend'],
@@ -585,7 +590,7 @@
       dataIndex: 'name',
       showInTable: true,
       showTooltip: true,
-      width: 300,
+      width: 180,
       editType: hasAnyPermission(['FUNCTIONAL_CASE:READ+UPDATE']) ? ColumnEditTypeEnum.INPUT : undefined,
       sortable: {
         sortDirections: ['ascend', 'descend'],
@@ -601,7 +606,7 @@
       dataIndex: 'caseLevel',
       titleSlotName: 'caseLevelFilter',
       showInTable: true,
-      width: 200,
+      width: 150,
       showDrag: true,
     },
     {
@@ -610,7 +615,7 @@
       slotName: 'reviewStatus',
       titleSlotName: 'reviewStatusFilter',
       showInTable: true,
-      width: 200,
+      width: 150,
       showDrag: true,
     },
     {
@@ -619,7 +624,7 @@
       slotName: 'lastExecuteResult',
       titleSlotName: 'executeResultFilter',
       showInTable: true,
-      width: 200,
+      width: 150,
       showDrag: true,
     },
     // {
@@ -636,7 +641,7 @@
       slotName: 'moduleId',
       dataIndex: 'moduleId',
       showInTable: true,
-      width: 300,
+      width: 200,
       showDrag: true,
     },
     {
@@ -654,10 +659,6 @@
       showTooltip: true,
       dataIndex: 'updateUserName',
       titleSlotName: 'updateUserFilter',
-      sortable: {
-        sortDirections: ['ascend', 'descend'],
-        sorter: true,
-      },
       showInTable: true,
       width: 200,
       showDrag: true,
@@ -997,6 +998,10 @@
     tableSelected.value = selectArr;
   }
 
+  function filterTreeNode(searchValue: string, nodeValue: TreeNodeData) {
+    return (nodeValue as ModuleTreeNode).name.toLowerCase().indexOf(searchValue.toLowerCase()) > -1;
+  }
+
   const searchParams = ref<TableQueryParams>({
     projectId: currentProjectId.value,
     moduleIds: [],
@@ -1141,6 +1146,7 @@
       };
       if (isMove.value) {
         await batchMoveToModules(params);
+        groupKeyword.value = '';
         Message.success(t('caseManagement.featureCase.batchMoveSuccess'));
       } else {
         await batchCopyToModules(params);
@@ -1160,6 +1166,7 @@
   function handleMoveCaseModalCancel() {
     showBatchMoveDrawer.value = false;
     selectedModuleKeys.value = [];
+    groupKeyword.value = '';
   }
 
   function caseNodeSelect(keys: string[]) {
@@ -1685,6 +1692,10 @@
       }
     }
   );
+
+  onBeforeUnmount(() => {
+    showDetailDrawer.value = false;
+  });
 
   defineExpose({
     emitTableParams,

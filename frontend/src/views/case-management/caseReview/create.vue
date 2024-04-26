@@ -8,7 +8,7 @@
       <a-form-item
         field="name"
         :label="t('caseManagement.caseReview.reviewName')"
-        :rules="[{ required: true, message: t('caseManagement.caseReview.reviewNameRequired') }]"
+        :rules="[{ validator: validateName }]"
         asterisk-position="end"
       >
         <a-input
@@ -33,6 +33,7 @@
           :field-names="{ title: 'name', key: 'id', children: 'children' }"
           :loading="moduleLoading"
           allow-search
+          :filter-tree-node="filterTreeNode"
         >
           <template #tree-slot-title="node">
             <a-tooltip :content="`${node.name}`" position="tl">
@@ -75,12 +76,6 @@
         <template #label>
           <div class="inline-flex items-center">
             {{ t('caseManagement.caseReview.defaultReviewer') }}
-            <a-tooltip :content="t('caseManagement.caseReview.defaultReviewerTip')" position="right">
-              <icon-question-circle
-                class="ml-[4px] text-[var(--color-text-4)] hover:text-[rgb(var(--primary-5))]"
-                size="16"
-              />
-            </a-tooltip>
           </div>
         </template>
         <MsSelect
@@ -102,6 +97,7 @@
             </div>
           </template>
         </MsSelect>
+        <span class="text-[var(--color-text-4)]">{{ t('caseManagement.caseReview.defaultReviewerTip') }}</span>
       </a-form-item>
       <a-form-item field="tags" :label="t('caseManagement.caseReview.tag')">
         <MsTagsInput v-model:model-value="reviewForm.tags" />
@@ -210,7 +206,7 @@
    */
   import { onBeforeMount } from 'vue';
   import { useRoute, useRouter } from 'vue-router';
-  import { Message, SelectOptionData } from '@arco-design/web-vue';
+  import { Message, SelectOptionData, TreeNodeData } from '@arco-design/web-vue';
 
   import MsAvatar from '@/components/pure/ms-avatar/index.vue';
   import MsButton from '@/components/pure/ms-button/index.vue';
@@ -231,10 +227,10 @@
   import useAppStore from '@/store/modules/app';
 
   import type { BaseAssociateCaseRequest, ReviewPassRule } from '@/models/caseManagement/caseReview';
+  import { ModuleTreeNode } from '@/models/common';
   import { CaseManagementRouteEnum } from '@/enums/routeEnum';
 
   import type { FormInstance } from '@arco-design/web-vue';
-  import { string } from 'fast-glob/out/utils';
 
   const route = useRoute();
   const router = useRouter();
@@ -256,6 +252,17 @@
   });
   const moduleOptions = ref<SelectOptionData[]>([]);
   const moduleLoading = ref(false);
+
+  const validateName = (value: string | undefined, callback: (error?: string) => void) => {
+    if (value === undefined || value.trim() === '') {
+      callback(t('caseManagement.caseReview.reviewNameRequired'));
+    } else {
+      if (value.length > 255) {
+        callback(t('common.nameIsTooLang'));
+      }
+      callback();
+    }
+  };
 
   /**
    * 初始化模块选择
@@ -302,6 +309,10 @@
 
   function writeAssociateCases(param: BaseAssociateCaseRequest) {
     selectedAssociateCasesParams.value = { ...param };
+  }
+
+  function filterTreeNode(searchValue: string, nodeValue: TreeNodeData) {
+    return (nodeValue as ModuleTreeNode).name.toLowerCase().indexOf(searchValue.toLowerCase()) > -1;
   }
 
   function clearSelectedCases() {

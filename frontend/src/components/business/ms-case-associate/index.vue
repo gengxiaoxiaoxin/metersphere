@@ -14,6 +14,7 @@
           v-model:model-value="caseType"
           class="ml-2 max-w-[100px]"
           :placeholder="t('caseManagement.featureCase.PleaseSelect')"
+          @change="changeCaseTypeHandler"
         >
           <a-option v-for="item of props?.moduleOptions" :key="item.value" :value="item.value">
             {{ t(item.label) }}
@@ -90,8 +91,8 @@
           >
             <template #title="nodeData">
               <div class="inline-flex w-full">
-                <div class="one-line-text w-[calc(100%-32px)] text-[var(--color-text-1)]">{{ nodeData.name }}</div>
-                <div class="ms-tree-node-count ml-[4px] text-[var(--color-text-4)]">({{ nodeData.count || 0 }})</div>
+                <div class="one-line-text w-full text-[var(--color-text-1)]">{{ nodeData.name }}</div>
+                <div class="ms-tree-node-count ml-[4px] text-[var(--color-text-brand)]">{{ nodeData.count || 0 }}</div>
               </div>
             </template>
           </MsTree>
@@ -361,20 +362,20 @@
       slotName: 'num',
       sortIndex: 1,
       showTooltip: true,
-      sortable: {
-        sortDirections: ['ascend', 'descend'],
-        sorter: true,
-      },
+      // sortable: {
+      //   sortDirections: ['ascend', 'descend'],
+      //   sorter: true,
+      // },
       width: 150,
       fixed: 'left',
     },
     {
       title: 'ms.case.associate.caseName',
       dataIndex: 'name',
-      sortable: {
-        sortDirections: ['ascend', 'descend'],
-        sorter: true,
-      },
+      // sortable: {
+      //   sortDirections: ['ascend', 'descend'],
+      //   sorter: true,
+      // },
       showTooltip: true,
       width: 250,
     },
@@ -396,10 +397,10 @@
       title: 'caseManagement.featureCase.tableColumnCreateTime',
       slotName: 'createTime',
       dataIndex: 'createTime',
-      sortable: {
-        sortDirections: ['ascend', 'descend'],
-        sorter: true,
-      },
+      // sortable: {
+      //   sortDirections: ['ascend', 'descend'],
+      //   sorter: true,
+      // },
       width: 200,
       showDrag: true,
     },
@@ -672,17 +673,13 @@
     }
   );
 
-  // 用例类型改变
-  watch(
-    () => caseType.value,
-    (val) => {
-      if (val) {
-        emit('update:currentSelectCase', val);
-        initModules();
-        searchCase();
-      }
-    }
-  );
+  function changeCaseTypeHandler(
+    value: string | number | boolean | Record<string, any> | (string | number | boolean | Record<string, any>)[]
+  ) {
+    caseType.value = value as keyof typeof CaseLinkEnum;
+    initModules();
+    searchCase();
+  }
 
   watch(
     () => innerProject.value,
@@ -715,6 +712,18 @@
           count: obj?.[node.id] || 0,
         };
       });
+    }
+  );
+
+  watch(
+    () => props.currentSelectCase,
+    () => {
+      if (!props.hideProjectSelect) {
+        initProjectList(true);
+      }
+      initModules();
+      searchCase();
+      initFilter();
     }
   );
 

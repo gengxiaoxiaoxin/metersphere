@@ -17,6 +17,7 @@
           class="mr-[8px] w-[240px]"
           @search="loadCaseList"
           @press-enter="loadCaseList"
+          @clear="loadCaseList"
         />
         <a-button type="outline" class="arco-btn-outline--secondary !p-[8px]" @click="loadCaseList">
           <template #icon>
@@ -150,6 +151,7 @@
           v-model:status-filters="createUserFilters"
           :title="(columnConfig.title as string)"
           :list="memberOptions"
+          label-key="label"
           @search="loadCaseList"
         >
           <template #item="{ item }">
@@ -462,6 +464,7 @@
       width: 130,
       ellipsis: true,
       showTooltip: true,
+      columnSelectorDisabled: true,
     },
     {
       title: 'case.caseName',
@@ -472,6 +475,7 @@
         sorter: true,
       },
       width: 180,
+      columnSelectorDisabled: true,
     },
     {
       title: 'case.caseLevel',

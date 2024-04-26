@@ -122,7 +122,6 @@
   import { getGenerateId } from '@/utils';
 
   import { AddApiCaseParams, ApiCaseDetail, ApiDefinitionDetail } from '@/models/apiTest/management';
-  import { EnvConfig } from '@/models/projectManagement/environmental';
   import { RequestCaseStatus, RequestMethods } from '@/enums/apiEnum';
 
   import { casePriorityOptions, defaultResponse } from '@/views/api-test/components/config';
@@ -167,6 +166,13 @@
 
   const environmentId = ref(appStore.currentEnvConfig?.id);
 
+  watch(
+    () => appStore.currentEnvConfig?.id,
+    (val) => {
+      environmentId.value = val;
+    }
+  );
+
   const formRef = ref<FormInstance>();
   const requestCompositionRef = ref<InstanceType<typeof requestComposition>>();
   const defaultCaseParams = inject<RequestParam>('defaultCaseParams');
@@ -181,6 +187,7 @@
   const isEdit = ref(false);
 
   async function open(apiId: string, record?: ApiCaseDetail | RequestParam, isCopy?: boolean) {
+    appStore.showLoading();
     apiDefinitionId.value = apiId;
     // 从api下的用例里打开抽屉有api信息，从case下直接复制没有api信息
     if (props.apiDetail) {
@@ -189,6 +196,7 @@
       await getApiDetail();
     }
     // 创建的时候，请求参数为接口定义的请求参数
+    environmentId.value = appStore.currentEnvConfig?.id;
     detailForm.value = {
       ...cloneDeep(defaultDetail.value),
       ...(apiDetailInfo.value.protocol === 'HTTP'
@@ -208,11 +216,11 @@
     if (isCopy) {
       detailForm.value = cloneDeep(record as RequestParam);
       detailForm.value.name = `copy_${record?.name}`;
+      environmentId.value = record?.environmentId;
       if (detailForm.value.name.length > 255) {
         detailForm.value.name = detailForm.value.name.slice(0, 255);
       }
     }
-    environmentId.value = appStore.currentEnvConfig?.id;
     // 编辑
     if (!isCopy && record?.id) {
       isEdit.value = true;
@@ -220,6 +228,7 @@
       environmentId.value = record.environmentId;
       detailForm.value.isNew = false;
     }
+    appStore.hideLoading();
     innerVisible.value = true;
     await nextTick();
     requestCompositionRef.value?.changeVerticalExpand(false); // 响应内容默认折叠

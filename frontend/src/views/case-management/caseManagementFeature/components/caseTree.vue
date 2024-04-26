@@ -16,7 +16,7 @@
       :node-more-actions="caseMoreActions"
       :expand-all="props.isExpandAll"
       :empty-text="t('common.noData')"
-      draggable
+      :draggable="!props.isModal && hasAnyPermission(['FUNCTIONAL_CASE:READ+UPDATE'])"
       :virtual-list-props="virtualListProps"
       block-node
       :field-names="{
@@ -33,14 +33,15 @@
     >
       <template #title="nodeData">
         <div class="inline-flex w-full">
-          <div class="one-line-text w-[calc(100%-32px)] text-[var(--color-text-1)]">{{ nodeData.name }}</div>
-          <div v-if="!props.isModal" class="ms-tree-node-count ml-[4px] text-[var(--color-text-4)]"
-            >({{ nodeData.count || 0 }})</div
-          >
+          <div class="one-line-text w-full text-[var(--color-text-1)]">{{ nodeData.name }}</div>
+          <div v-if="!props.isModal" class="ms-tree-node-count ml-[4px] text-[var(--color-text-brand)]">
+            {{ nodeData.count || 0 }}
+          </div>
         </div>
       </template>
       <template v-if="!props.isModal" #extra="nodeData">
         <MsPopConfirm
+          v-if="hasAnyPermission(['FUNCTIONAL_CASE:READ+ADD'])"
           :visible="addSubVisible"
           :is-delete="false"
           :all-names="[]"
@@ -58,6 +59,7 @@
           </MsButton>
         </MsPopConfirm>
         <MsPopConfirm
+          v-if="hasAnyPermission(['FUNCTIONAL_CASE:READ+UPDATE'])"
           :title="t('caseManagement.featureCase.rename')"
           :all-names="[]"
           :is-delete="false"
@@ -93,12 +95,12 @@
     moveCaseModuleTree,
     updateCaseModuleTree,
   } from '@/api/modules/case-management/featureCase';
-  import { ProjectMemberOptions } from '@/api/requrls/project-management/projectMember';
   import { useI18n } from '@/hooks/useI18n';
   import useModal from '@/hooks/useModal';
   import useAppStore from '@/store/modules/app';
   import useFeatureCaseStore from '@/store/modules/case/featureCase';
   import { mapTree } from '@/utils';
+  import { hasAnyPermission } from '@/utils/permission';
 
   import type { CreateOrUpdateModule, UpdateModule } from '@/models/caseManagement/featureCase';
   import { ModuleTreeNode } from '@/models/common';
@@ -137,11 +139,13 @@
     {
       label: 'caseManagement.featureCase.rename',
       eventTag: 'rename',
+      permission: ['FUNCTIONAL_CASE:READ+UPDATE'],
     },
     {
       label: 'caseManagement.featureCase.delete',
       eventTag: 'delete',
       danger: true,
+      permission: ['FUNCTIONAL_CASE:READ+DELETE'],
     },
   ];
 
@@ -357,7 +361,7 @@
       };
     }
     return {
-      height: 'calc(100vh - 294px)',
+      height: 'calc(100vh - 240px)',
       threshold: 200,
       fixedSize: true,
       buffer: 15,
@@ -382,7 +386,7 @@
       caseTree.value = mapTree<ModuleTreeNode>(caseTree.value, (node) => {
         return {
           ...node,
-          hideMoreAction: props.isModal,
+          hideMoreAction: node.id === 'root' || props.isModal,
           count: obj?.[node.id] || 0,
         };
       });

@@ -10,7 +10,7 @@
         @adv-search="searchCase"
         @refresh="searchCase"
       >
-        <template #right>
+        <!-- <template #right>
           <div class="flex items-center">
             <a-radio-group v-model:model-value="showType" type="button" class="case-show-type">
               <a-radio value="list" class="show-type-icon p-[2px]">
@@ -21,7 +21,7 @@
               </a-radio>
             </a-radio-group>
           </div>
-        </template>
+        </template> -->
       </MsAdvanceFilter>
     </div>
     <ms-base-table
@@ -317,13 +317,7 @@
   import useUserStore from '@/store/modules/user';
   import { hasAnyPermission } from '@/utils/permission';
 
-  import {
-    ReviewCaseItem,
-    ReviewItem,
-    ReviewPassRule,
-    ReviewResult,
-    ReviewStatus,
-  } from '@/models/caseManagement/caseReview';
+  import { ReviewCaseItem, ReviewItem, ReviewPassRule, ReviewResult } from '@/models/caseManagement/caseReview';
   import { BatchApiParams, ModuleTreeNode } from '@/models/common';
   import { CaseManagementRouteEnum } from '@/enums/routeEnum';
   import { TableKeyEnum } from '@/enums/tableEnum';
@@ -354,7 +348,7 @@
   const { t } = useI18n();
   const { openModal } = useModal();
   const keyword = ref('');
-  const showType = ref<'list' | 'mind'>('list');
+  // const showType = ref<'list' | 'mind'>('list');
   const filterRowCount = ref(0);
   const filterConfigList = ref<FilterFormItem[]>([]);
   const tableParams = ref<Record<string, any>>({});
@@ -455,18 +449,22 @@
       {
         label: 'caseManagement.caseReview.review',
         eventTag: 'review',
+        permission: ['CASE_REVIEW:READ+REVIEW'],
       },
       {
         label: 'caseManagement.caseReview.changeReviewer',
         eventTag: 'changeReviewer',
+        permission: ['CASE_REVIEW:READ+UPDATE'],
       },
       {
         label: 'caseManagement.caseReview.disassociate',
         eventTag: 'disassociate',
+        permission: ['CASE_REVIEW:READ+RELEVANCE'],
       },
       {
         label: 'caseManagement.caseReview.reReview',
         eventTag: 'reReview',
+        permission: ['CASE_REVIEW:READ+UPDATE'],
       },
     ],
   };
@@ -479,6 +477,9 @@
       keyword: keyword.value,
       viewFlag: props.onlyMine,
       filter: { status: statusFilters.value, caseLevel: caseFilters.value },
+      current: propsRes.value.msPagination?.current,
+      pageSize: propsRes.value.msPagination?.pageSize,
+      total: propsRes.value.msPagination?.total,
       combine: filter
         ? {
             ...filter.combine,
@@ -489,9 +490,6 @@
     loadList();
     emit('init', {
       ...tableParams.value,
-      current: propsRes.value.msPagination?.current,
-      pageSize: propsRes.value.msPagination?.pageSize,
-      total: propsRes.value.msPagination?.total,
       moduleIds: [],
     });
   }
@@ -577,7 +575,7 @@
     try {
       disassociateLoading.value = true;
       await disassociateReviewCase(route.query.id as string, record.caseId);
-      emit('refresh');
+      emit('refresh', tableParams.value);
       if (done) {
         done();
       }
@@ -638,7 +636,7 @@
           Message.success(t('common.updateSuccess'));
           resetSelector();
           loadList();
-          emit('refresh');
+          emit('refresh', tableParams.value);
         } catch (error) {
           // eslint-disable-next-line no-console
           console.log(error);
@@ -674,7 +672,7 @@
       Message.success(t('common.updateSuccess'));
       dialogVisible.value = false;
       resetSelector();
-      emit('refresh');
+      emit('refresh', tableParams.value);
       loadList();
     } catch (error) {
       // eslint-disable-next-line no-console
@@ -733,7 +731,7 @@
           Message.success(t('caseManagement.caseReview.reviewSuccess'));
           dialogVisible.value = false;
           resetSelector();
-          emit('refresh');
+          emit('refresh', tableParams.value);
           loadList();
         } catch (error) {
           // eslint-disable-next-line no-console

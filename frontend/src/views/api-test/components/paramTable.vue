@@ -67,6 +67,11 @@
         </a-tooltip>
       </div>
     </template>
+    <template #batchAddTitle>
+      <MsButton type="text" size="mini" class="!mr-0" @click="emit('batchAdd')">
+        {{ t('apiTestDebug.batchAdd') }}
+      </MsButton>
+    </template>
     <!-- 表格列 slot -->
     <!-- 参数名 or 请求/响应头联想输入 -->
     <template #key="{ record, columnConfig, rowIndex }">
@@ -87,11 +92,12 @@
           v-if="columnConfig.inputType === 'autoComplete'"
           v-model:model-value="record[columnConfig.dataIndex as string]"
           :disabled="props.disabledExceptParam || columnConfig.disabledColumn"
-          :data="record[columnConfig.dataIndex as string] !== '' ? columnConfig.autoCompleteParams?.filter((e) => e.isShow === true) : columnConfig.autoCompleteParams"
+          :data="getAutoCompleteData(columnConfig, record)"
           class="ms-form-table-input"
           :trigger-props="{ contentClass: 'ms-form-table-input-trigger' }"
           :filter-option="false"
           size="mini"
+          @focus="handleAutoCompleteFocus(record)"
           @search="(val) => handleSearchParams(val, columnConfig)"
           @change="() => addTableLine(rowIndex, columnConfig.addLineDisabled)"
           @select="(val) => selectAutoComplete(val, record, columnConfig)"
@@ -211,7 +217,7 @@
         :multiple="true"
         :fields="{
           id: 'fileId',
-          name: 'fileName',
+          name: 'fileAlias',
         }"
         :file-save-as-source-id="props.fileSaveAsSourceId"
         :file-save-as-api="props.fileSaveAsApi"
@@ -245,7 +251,7 @@
           model-event="input"
           @change="() => addTableLine(rowIndex)"
         />
-        <div class="mx-[4px]">{{ t('common.to') }}</div>
+        <div class="mx-[4px] flex-1 whitespace-nowrap">{{ t('common.to') }}</div>
         <a-input-number
           v-model:model-value="record.maxLength"
           :disabled="props.disabledExceptParam"
@@ -323,9 +329,9 @@
         class="ms-form-table-input"
         @change="() => addTableLine(rowIndex, columnConfig.addLineDisabled)"
       >
-        <a-option v-for="item in columnConfig.options" :key="item.value" :value="item.value">{{
-          t(item.label)
-        }}</a-option>
+        <a-option v-for="item in columnConfig.options" :key="item.value" :value="item.value">
+          {{ t(item.label) }}
+        </a-option>
       </a-select>
     </template>
     <!-- 匹配值 -->
@@ -635,6 +641,7 @@
     (e: 'moreActionSelect', event: ActionsItem, record: Record<string, any>): void;
     (e: 'projectChange', projectId: string): void;
     (e: 'treeDelete', record: Record<string, any>): void;
+    (e: 'batchAdd'): void;
   }>();
 
   const appStore = useAppStore();
@@ -821,11 +828,9 @@
     () => props.params,
     (arr) => {
       if (arr.length > 0) {
-        let hasNoIdItem = false;
         paramsData.value = arr.map((item, i) => {
           if (!item) {
             // 批量添加过来的数据最后一行会是 undefined
-            hasNoIdItem = true;
             return {
               ...cloneDeep(props.defaultParamItem),
               id: new Date().getTime() + i,
@@ -833,7 +838,6 @@
           }
           if (!item.id) {
             // 后台存储无id，渲染时需要手动添加一次
-            hasNoIdItem = true;
             return {
               ...item,
               id: new Date().getTime() + i,
@@ -841,7 +845,7 @@
           }
           return item;
         });
-        if (hasNoIdItem && !filterKeyValParams(arr, props.defaultParamItem).lastDataIsDefault && !props.isTreeTable) {
+        if (!filterKeyValParams(arr, props.defaultParamItem).lastDataIsDefault && !props.isTreeTable) {
           addTableLine(arr.length - 1, false, true);
         }
       } else {
@@ -1039,6 +1043,21 @@
       e.isShow = (e.label || '').toLowerCase().includes(val.toLowerCase());
       return e;
     });
+  }
+
+  const activeRecord = ref<Record<string, any>>({});
+  function getAutoCompleteData(columnConfig: ParamTableColumn, record: Record<string, any>) {
+    if (activeRecord.value.id !== record.id) {
+      // 非聚焦行，不显示联想输入
+      return [];
+    }
+    return activeRecord.value[columnConfig.dataIndex as string] !== ''
+      ? columnConfig.autoCompleteParams?.filter((e) => e.isShow === true)
+      : columnConfig.autoCompleteParams;
+  }
+
+  function handleAutoCompleteFocus(record: Record<string, any>) {
+    activeRecord.value = record;
   }
 
   function selectAutoComplete(val: string, record: Record<string, any>, item: FormTableColumn) {

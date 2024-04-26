@@ -77,7 +77,7 @@
           :title="item.slotName"
         >
           <template #title>
-            <div :class="{ 'flex w-full flex-row flex-nowrap items-center gap-[16px]': !item.align }">
+            <div :class="{ 'flex w-full flex-row flex-nowrap items-center gap-[4px]': !item.align }">
               <slot :name="item.titleSlotName" :column-config="item">
                 <div v-if="item.title" class="text-[var(--color-text-3)]">{{ t(item.title as string) }}</div>
               </slot>
@@ -129,6 +129,7 @@
                   :tag-list="record[item.dataIndex as string]"
                   type="primary"
                   theme="outline"
+                  :tag-position="item.tagPosition"
                 />
               </template>
               <template v-else-if="item.slotName === SpecialColumnEnum.OPERATION">

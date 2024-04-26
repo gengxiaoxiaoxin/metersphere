@@ -30,6 +30,7 @@
         allow-clear
         @search="searchFiled"
         @press-enter="searchFiled"
+        @clear="searchFiled"
       ></a-input-search>
     </div>
     <MsBaseTable v-bind="propsRes" ref="tableRef" v-on="propsEvent">
@@ -321,7 +322,10 @@
 
 <style scoped lang="less">
   .system-flag {
+    @apply ml-2 rounded p-1;
+
+    font-size: 12px;
+    line-height: 20px;
     background: var(--color-text-n8);
-    @apply ml-2 rounded p-1 text-xs;
   }
 </style>

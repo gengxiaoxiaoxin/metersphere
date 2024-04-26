@@ -196,6 +196,7 @@
             :disabled="props.disabled"
             show-type="commonScript"
             :show-header="false"
+            :script-code-editor-height="props.scriptCodeEditorHeight"
             @change="() => emit('change')"
           />
         </div>
@@ -276,7 +277,7 @@
       </div>
       <template v-if="condition.dataSourceId">
         <div class="mb-[8px] text-[var(--color-text-1)]">{{ t('apiTestDebug.sqlScript') }}</div>
-        <div class="mb-[8px] h-[300px]">
+        <div class="mb-[8px]">
           <MsCodeEditor
             v-model:model-value="condition.script"
             :read-only="props.disabled"
@@ -423,7 +424,7 @@
         <template #operationPre="{ record }">
           <a-popover
             v-model:popupVisible="record.moreSettingPopoverVisible"
-            position="tl"
+            position="tr"
             trigger="click"
             :title="t('common.setting')"
             :content-style="{ width: '480px' }"
@@ -535,6 +536,7 @@
       showPrePostRequest?: boolean; // 是否展示前后置请求忽略
       totalList?: ExecuteConditionProcessor[]; // 总列表
       sqlCodeEditorHeight?: string; // sql脚本编辑器高度
+      scriptCodeEditorHeight?: string; // 脚本的高度
     }>(),
     {
       showAssociatedScene: false,

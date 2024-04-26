@@ -290,12 +290,10 @@
     <a-modal
       v-model:visible="showScenarioConfig"
       :title="t('apiScenario.scenarioConfig')"
-      :ok-text="t('common.confirm')"
       class="ms-modal-form"
       body-class="!overflow-hidden !p-0"
       :width="680"
       title-align="start"
-      @ok="applyQuickInput"
     >
       <a-form :model="scenarioConfigForm" layout="vertical" class="ms-form">
         <a-form-item>
@@ -375,15 +373,15 @@
         </a-form-item>
       </a-form>
       <template #footer>
-        <div class="flex items-center justify-between">
-          <div class="flex items-center">
+        <div class="flex items-center justify-end">
+          <!-- <div class="flex items-center">
             <div class="text-[var(--color-text-4)]">
               {{ t('apiScenario.valuePriority') }}
             </div>
             <div v-if="scenarioConfigParamTip" class="text-[var(--color-text-1)]">
               {{ scenarioConfigParamTip }}
             </div>
-          </div>
+          </div> -->
           <div class="flex items-center gap-[12px]">
             <a-button type="secondary" @click="cancelScenarioConfig">{{ t('common.cancel') }}</a-button>
             <a-button type="primary" @click="saveScenarioConfig">{{ t('common.confirm') }}</a-button>
@@ -719,48 +717,48 @@
     useOriginScenarioParam: false,
   });
   const showScenarioConfig = ref(false);
-  const scenarioConfigParamTip = computed(() => {
-    if (!scenarioConfigForm.value.useOriginScenarioParam && !scenarioConfigForm.value.enableScenarioEnv) {
-      // 非使用原场景参数-非选择源场景环境
-      return t('apiScenario.notSource');
-    }
-    if (!scenarioConfigForm.value.useOriginScenarioParam && scenarioConfigForm.value.enableScenarioEnv) {
-      // 非使用原场景参数-选择源场景环境
-      return t('apiScenario.notSourceParamAndSourceEnv');
-    }
-    if (
-      scenarioConfigForm.value.useOriginScenarioParam &&
-      scenarioConfigForm.value.useOriginScenarioParamPreferential &&
-      !scenarioConfigForm.value.enableScenarioEnv
-    ) {
-      // 使用原场景参数-优先使用原场景参数
-      return t('apiScenario.sourceParamAndSource');
-    }
-    if (
-      scenarioConfigForm.value.useOriginScenarioParam &&
-      scenarioConfigForm.value.useOriginScenarioParamPreferential &&
-      scenarioConfigForm.value.enableScenarioEnv
-    ) {
-      // 使用原场景参数-优先使用原场景参数-选择源场景环境
-      return t('apiScenario.sourceParamAndSourceEnv');
-    }
-    if (
-      scenarioConfigForm.value.useOriginScenarioParam &&
-      !scenarioConfigForm.value.useOriginScenarioParamPreferential &&
-      !scenarioConfigForm.value.enableScenarioEnv
-    ) {
-      // 使用原场景参数-优先使用当前场景参数
-      return t('apiScenario.currentParamAndSource');
-    }
-    if (
-      scenarioConfigForm.value.useOriginScenarioParam &&
-      !scenarioConfigForm.value.useOriginScenarioParamPreferential &&
-      scenarioConfigForm.value.enableScenarioEnv
-    ) {
-      // 使用原场景参数-优先使用当前场景参数-选择源场景环境
-      return t('apiScenario.currentParamAndSourceEnv');
-    }
-  });
+  // const scenarioConfigParamTip = computed(() => {
+  //   if (!scenarioConfigForm.value.useOriginScenarioParam && !scenarioConfigForm.value.enableScenarioEnv) {
+  //     // 非使用原场景参数-非选择源场景环境
+  //     return t('apiScenario.notSource');
+  //   }
+  //   if (!scenarioConfigForm.value.useOriginScenarioParam && scenarioConfigForm.value.enableScenarioEnv) {
+  //     // 非使用原场景参数-选择源场景环境
+  //     return t('apiScenario.notSourceParamAndSourceEnv');
+  //   }
+  //   if (
+  //     scenarioConfigForm.value.useOriginScenarioParam &&
+  //     scenarioConfigForm.value.useOriginScenarioParamPreferential &&
+  //     !scenarioConfigForm.value.enableScenarioEnv
+  //   ) {
+  //     // 使用原场景参数-优先使用原场景参数
+  //     return t('apiScenario.sourceParamAndSource');
+  //   }
+  //   if (
+  //     scenarioConfigForm.value.useOriginScenarioParam &&
+  //     scenarioConfigForm.value.useOriginScenarioParamPreferential &&
+  //     scenarioConfigForm.value.enableScenarioEnv
+  //   ) {
+  //     // 使用原场景参数-优先使用原场景参数-选择源场景环境
+  //     return t('apiScenario.sourceParamAndSourceEnv');
+  //   }
+  //   if (
+  //     scenarioConfigForm.value.useOriginScenarioParam &&
+  //     !scenarioConfigForm.value.useOriginScenarioParamPreferential &&
+  //     !scenarioConfigForm.value.enableScenarioEnv
+  //   ) {
+  //     // 使用原场景参数-优先使用当前场景参数
+  //     return t('apiScenario.currentParamAndSource');
+  //   }
+  //   if (
+  //     scenarioConfigForm.value.useOriginScenarioParam &&
+  //     !scenarioConfigForm.value.useOriginScenarioParamPreferential &&
+  //     scenarioConfigForm.value.enableScenarioEnv
+  //   ) {
+  //     // 使用原场景参数-优先使用当前场景参数-选择源场景环境
+  //     return t('apiScenario.currentParamAndSourceEnv');
+  //   }
+  // });
 
   // 关闭场景配置弹窗
   function cancelScenarioConfig() {
@@ -1538,7 +1536,7 @@
       handleCreateStep(
         {
           stepType: ScenarioStepType.CUSTOM_REQUEST,
-          name: request.name || t('apiScenario.customApi'),
+          name: request.stepName || request.name || t('apiScenario.customApi'),
           config: {
             protocol: request.protocol,
             method: request.method,
@@ -1577,16 +1575,17 @@
    * API 详情抽屉关闭时应用更改
    */
   function applyApiStep(request: RequestParam | CaseRequestParam) {
+    if (request.unSaved) {
+      scenario.value.unSaved = true;
+    }
     if (activeStep.value) {
       const _stepType = getStepType(activeStep.value);
       if (_stepType.isQuoteCase || activeStep.value.isQuoteScenarioStep) {
-        // 引用的 case 和引用的场景步骤都不可更改
+        // 引用的 case 和引用的场景步骤都不可更改（除了步骤名）
+        activeStep.value.name = request.stepName || request.name;
         stepDetails.value[activeStep.value.id] = request; // 为了设置一次正确的polymorphicName
         return;
       }
-    }
-    if (request.unSaved) {
-      scenario.value.unSaved = true;
     }
     if (activeStep.value) {
       request.isNew = false;
@@ -1601,7 +1600,7 @@
         ...activeStep.value.config,
         method: request.method,
       };
-      activeStep.value.name = request.name;
+      activeStep.value.name = request.stepName || request.name;
       emit('updateResource', request.uploadFileIds, request.linkFileIds);
       activeStep.value = undefined;
     }

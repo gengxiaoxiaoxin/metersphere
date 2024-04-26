@@ -28,6 +28,7 @@
               >
                 <MsIcon type="icon-icon_delete-trash_outlined" class="folder-icon" />
                 <div class="folder-name mx-[4px]">{{ t('caseManagement.featureCase.recycle') }}</div>
+                <div class="folder-count">({{ recycleModulesCount || 0 }})</div>
               </div>
             </div>
           </div>
@@ -76,11 +77,14 @@
   import management from './components/management/index.vue';
   import moduleTree from './components/moduleTree.vue';
 
+  import { getTrashModuleCount } from '@/api/modules/api-test/management';
   import { useI18n } from '@/hooks/useI18n';
 
   import { ApiDefinitionGetModuleParams } from '@/models/apiTest/management';
   import { ModuleTreeNode } from '@/models/common';
   import { ApiTestRouteEnum } from '@/enums/routeEnum';
+
+  import useAppStore from '../../../store/modules/app';
 
   const route = useRoute();
   const { t } = useI18n();
@@ -96,9 +100,9 @@
   const managementRef = ref<InstanceType<typeof management>>();
 
   function handleModuleInit(tree: ModuleTreeNode[], _protocol: string, pathMap: Record<string, any>) {
-    folderTree.value = tree;
+    // folderTree.value = tree;
     protocol.value = _protocol;
-    folderTreePathMap.value = pathMap;
+    // folderTreePathMap.value = pathMap;
   }
 
   function newApi() {
@@ -128,16 +132,30 @@
     protocol.value = val;
   }
 
-  function refreshModuleTree() {
-    moduleTreeRef.value?.refresh();
+  const appStore = useAppStore();
+  const recycleModulesCount = ref(0);
+  async function selectRecycleCount() {
+    const res = await getTrashModuleCount({
+      projectId: appStore.currentProjectId,
+      keyword: '',
+      moduleIds: [],
+      protocol: protocol.value,
+    });
+    recycleModulesCount.value = res.all;
+  }
+
+  async function refreshModuleTree() {
+    await moduleTreeRef.value?.refresh();
+    //  涉及到模块树的刷新操作（比如删除），也会刷新回收站的数量
+    selectRecycleCount();
   }
 
   function refreshModuleTreeCount(params: ApiDefinitionGetModuleParams) {
     moduleTreeRef.value?.initModuleCount(params);
   }
 
-  function handleImportDone() {
-    refreshModuleTree();
+  async function handleImportDone() {
+    await refreshModuleTree();
     managementRef.value?.refreshApiTable();
   }
 
@@ -161,6 +179,7 @@
       // 携带 cId 参数，自动打开接口用例详情 tab
       managementRef.value?.newCaseTab(route.query.cId as string);
     }
+    selectRecycleCount();
   });
 
   // 获取激活用例类型样式

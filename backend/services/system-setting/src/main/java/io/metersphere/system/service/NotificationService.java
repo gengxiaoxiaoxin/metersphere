@@ -56,6 +56,8 @@ public class NotificationService {
     public List<OptionDTO> countNotification(NotificationRequest notificationRequest, String userId) {
         List<OptionDTO> optionDTOS = new ArrayList<>();
         buildParam(notificationRequest, userId);
+        notificationRequest.setResourceType(StringUtils.EMPTY);
+        notificationRequest.setStatus(NotificationConstants.Status.UNREAD.name());
         List<NotificationDTO> notifications = baseNotificationMapper.listNotification(notificationRequest);
         OptionDTO totalOptionDTO = new OptionDTO();
         totalOptionDTO.setId("total");
@@ -107,12 +109,12 @@ public class NotificationService {
     }
 
 
-    public Integer getUnRead(String projectId) {
+    public Integer getUnRead(String projectId, String userId) {
         NotificationExample example = new NotificationExample();
         if (StringUtils.isBlank(projectId)) {
             return 0;
         }
-        example.createCriteria().andProjectIdEqualTo(projectId).andStatusEqualTo(NotificationConstants.Status.UNREAD.name());
+        example.createCriteria().andProjectIdEqualTo(projectId).andStatusEqualTo(NotificationConstants.Status.UNREAD.name()).andReceiverEqualTo(userId);
         return (int) notificationMapper.countByExample(example);
     }
 }

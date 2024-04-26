@@ -36,7 +36,7 @@
                 :data="caseTree"
                 :keyword="groupKeyword"
                 :expand-all="isExpandAll"
-                :empty-text="t('caseManagement.featureCase.caseEmptyRecycle')"
+                :empty-text="t('common.noData')"
                 draggable
                 :virtual-list-props="virtualListProps"
                 block-node
@@ -51,10 +51,10 @@
               >
                 <template #title="nodeData">
                   <div class="inline-flex w-full" @click="setFocusKey(nodeData)">
-                    <div class="one-line-text w-[calc(100%-32px)] text-[var(--color-text-1)]">{{ nodeData.name }}</div>
-                    <div class="ms-tree-node-count ml-[4px] text-[var(--color-text-4)]"
-                      >({{ nodeData.count || 0 }})</div
-                    >
+                    <div class="one-line-text w-full text-[var(--color-text-1)]">{{ nodeData.name }}</div>
+                    <div class="ms-tree-node-count ml-[4px] text-[var(--color-text-brand)]">
+                      {{ nodeData.count || 0 }}
+                    </div>
                   </div>
                 </template>
               </MsTree>
@@ -83,7 +83,7 @@
                   <span class="text-[var(--color-text-4)]"> ({{ recycleModulesCount[activeFolder] || 0 }})</span>
                 </div>
                 <template #content>
-                  <div class="text-[14px] font-medium text-[var(--color-text-1)]">
+                  <div class="max-w-[400px] text-[14px] font-medium text-[var(--color-text-1)]">
                     {{ moduleNamePath }}
                     <span class="text-[var(--color-text-4)]">({{ recycleModulesCount[activeFolder] || 0 }})</span>
                   </div>
@@ -370,6 +370,7 @@
       'showTooltip': true,
       'ellipsis': true,
       'showDrag': false,
+      'columnSelectorDisabled': true,
     },
     {
       title: 'caseManagement.featureCase.tableColumnName',
@@ -384,6 +385,7 @@
       },
       ellipsis: true,
       showDrag: false,
+      columnSelectorDisabled: true,
     },
     {
       title: 'caseManagement.featureCase.tableColumnLevel',
@@ -441,10 +443,6 @@
       slotName: 'updateUserName',
       dataIndex: 'updateUser',
       titleSlotName: 'updateUserFilter',
-      sortable: {
-        sortDirections: ['ascend', 'descend'],
-        sorter: true,
-      },
       showInTable: true,
       showTooltip: true,
       width: 200,

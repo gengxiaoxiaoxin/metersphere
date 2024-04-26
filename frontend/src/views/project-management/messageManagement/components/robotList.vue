@@ -1,6 +1,7 @@
 <template>
   <div>
-    <MsCard :min-width="1060" :special-height="127" simple>
+    <!-- special-height的119: 上面卡片高度103 +上面卡片高度mb的16 -->
+    <MsCard :min-width="1060" :special-height="119" simple>
       <a-alert v-if="!getIsVisited()" :show-icon="false" class="mb-[16px]" closable @close="addVisited">
         {{ t('project.messageManagement.botListTips') }}
         <template #close-element>
@@ -85,10 +86,11 @@
               </div>
               <a-switch
                 v-model:model-value="robot.enable"
-                v-permission="['PROJECT_MESSAGE:READ+UPDATE']"
+                v-permission="['PROJECT_MESSAGE:READ']"
                 size="small"
                 class="ml-auto"
                 type="line"
+                :disabled="!hasAnyPermission(['PROJECT_MESSAGE:READ+UPDATE'])"
                 @change="handleEnableIntercept(robot)"
               />
             </div>
@@ -317,6 +319,7 @@
   import useAppStore from '@/store/modules/app';
   import { characterLimit } from '@/utils';
   import { translateTextToPX } from '@/utils/css';
+  import { hasAnyPermission } from '@/utils/permission';
 
   import type {
     ProjectRobotPlatform,

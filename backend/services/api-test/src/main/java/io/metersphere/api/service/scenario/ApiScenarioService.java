@@ -404,9 +404,6 @@ public class ApiScenarioService extends MoveNodeService {
     public List<String> doSelectIds(ApiScenarioBatchRequest request, boolean deleted) {
         if (request.isSelectAll()) {
             List<String> ids = extApiScenarioMapper.getIds(request, deleted);
-            if (CollectionUtils.isNotEmpty(request.getSelectIds())) {
-                ids.addAll(request.getSelectIds());
-            }
             if (CollectionUtils.isNotEmpty(request.getExcludeIds())) {
                 ids.removeAll(request.getExcludeIds());
             }
@@ -1453,7 +1450,8 @@ public class ApiScenarioService extends MoveNodeService {
     }
 
     public boolean isRequestStep(ApiScenarioStepCommonDTO step) {
-        return StringUtils.equalsAny(step.getStepType(), ApiScenarioStepType.API.name(), ApiScenarioStepType.API_CASE.name(), ApiScenarioStepType.CUSTOM_REQUEST.name());
+        ApiScenarioStepType scenarioStepType = EnumValidator.validateEnum(ApiScenarioStepType.class, step.getStepType());
+        return scenarioStepType == null ? false : scenarioStepType.isRequest();
     }
 
     /**
@@ -2178,7 +2176,12 @@ public class ApiScenarioService extends MoveNodeService {
 
         Map<String, List<ApiScenarioStepDTO>> currentScenarioParentStepMap = scenarioStepMap.get(scenarioId)
                 .stream()
-                .collect(Collectors.groupingBy(step -> Optional.ofNullable(step.getParentId()).orElse(StringUtils.EMPTY)));
+                .collect(Collectors.groupingBy(step -> {
+                    if (StringUtils.equals(step.getParentId(), "NONE")) {
+                        step.setParentId(StringUtils.EMPTY);
+                    }
+                    return Optional.ofNullable(step.getParentId()).orElse(StringUtils.EMPTY);
+                }));
 
         List<ApiScenarioStepDTO> steps = buildStepTree(currentScenarioParentStepMap.get(StringUtils.EMPTY), currentScenarioParentStepMap, scenarioStepMap, new HashSet<>());
 
@@ -2568,37 +2571,32 @@ public class ApiScenarioService extends MoveNodeService {
         }
         SqlSession sqlSession = sqlSessionFactory.openSession(ExecutorType.BATCH);
         ApiScenarioMapper mapper = sqlSession.getMapper(ApiScenarioMapper.class);
-        SubListUtils.dealForSubList(insertApiScenarioList, 100, subList -> {
-            subList.forEach(mapper::insertSelective);
-        });
-        response.setSuccess(insertApiScenarioList.size());
+
+        insertApiScenarioList.forEach(mapper::insertSelective);
+
         if (CollectionUtils.isNotEmpty(insertApiScenarioBlobList)) {
             ApiScenarioBlobMapper blobMapper = sqlSession.getMapper(ApiScenarioBlobMapper.class);
-            SubListUtils.dealForSubList(insertApiScenarioBlobList, 100, subList -> {
-                subList.forEach(blobMapper::insertSelective);
-            });
+            insertApiScenarioBlobList.forEach(blobMapper::insertSelective);
         }
         if (CollectionUtils.isNotEmpty(insertApiScenarioStepList)) {
             ApiScenarioStepMapper stepMapper = sqlSession.getMapper(ApiScenarioStepMapper.class);
-            SubListUtils.dealForSubList(insertApiScenarioStepList, 100, subList -> {
-                subList.forEach(stepMapper::insertSelective);
-            });
+            insertApiScenarioStepList.forEach(stepMapper::insertSelective);
         }
         if (CollectionUtils.isNotEmpty(insertApiScenarioStepBlobList)) {
             ApiScenarioStepBlobMapper stepBlobMapper = sqlSession.getMapper(ApiScenarioStepBlobMapper.class);
-            SubListUtils.dealForSubList(insertApiScenarioStepBlobList, 100, subList -> {
-                subList.forEach(stepBlobMapper::insertSelective);
-            });
+            insertApiScenarioStepBlobList.forEach(stepBlobMapper::insertSelective);
+
         }
         if (CollectionUtils.isNotEmpty(insertApiFileResourceList)) {
-            SubListUtils.dealForSubList(insertApiFileResourceList, 100, subList -> {
-                apiFileResourceService.batchInsert(subList);
-            });
+            apiFileResourceService.batchInsert(insertApiFileResourceList);
         }
+
         sqlSession.flushStatements();
         if (sqlSessionFactory != null) {
             SqlSessionUtils.closeSqlSession(sqlSession, sqlSessionFactory);
         }
+
+        response.setSuccess(insertApiScenarioList.size());
         return response;
     }
 

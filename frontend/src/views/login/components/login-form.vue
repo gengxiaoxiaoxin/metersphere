@@ -31,6 +31,7 @@
         >
           <a-input
             v-model="userInfo.username"
+            class="login-input"
             :max-length="64"
             size="large"
             :placeholder="
@@ -49,6 +50,7 @@
         >
           <a-input-password
             v-model="userInfo.password"
+            class="login-password-input"
             :placeholder="t('login.form.password.placeholder')"
             allow-clear
             :max-length="64"
@@ -61,7 +63,7 @@
           </a-button>
         </div>
         <a-divider v-if="isShowLDAP || isShowOIDC || isShowOAUTH" orientation="center" type="dashed" class="m-0 mb-2">
-          <span class="text-xs font-normal text-[var(--color-text-4)]">{{ t('login.form.modeLoginMethods') }}</span>
+          <span class="text-[12px] font-normal text-[var(--color-text-4)]">{{ t('login.form.modeLoginMethods') }}</span>
         </a-divider>
         <div v-if="userStore.loginType.length" class="mt-4 flex items-center justify-center">
           <div v-if="userInfo.authenticate !== 'LDAP' && isShowLDAP" class="loginType" @click="switchLoginType('LDAP')">
@@ -211,6 +213,7 @@
         console.log(err);
       } finally {
         setLoading(false);
+        userStore.getAuthentication();
       }
     }
   };
@@ -265,5 +268,38 @@
   }
   :deep(.arco-divider-text) {
     padding: 0 8px !important;
+  }
+  .login-input {
+    padding-right: 0;
+    padding-left: 0;
+    width: 336px;
+    height: 36px;
+  }
+  .login-input :deep(.arco-input) {
+    padding-right: 10px;
+    padding-left: 10px;
+  }
+  .login-password-input {
+    position: relative;
+    padding-right: 0;
+    padding-left: 0;
+    width: 336px;
+    height: 36px;
+  }
+  .login-password-input :deep(.arco-input) {
+    padding-right: 50px;
+    padding-left: 10px;
+  }
+  .login-password-input :deep(.arco-input-clear-btn) {
+    position: absolute;
+    top: 10px;
+    float: right;
+    margin-left: 290px;
+  }
+  .login-password-input :deep(.arco-input-suffix) {
+    position: absolute;
+    top: 10px;
+    float: right;
+    margin-left: 300px;
   }
 </style>

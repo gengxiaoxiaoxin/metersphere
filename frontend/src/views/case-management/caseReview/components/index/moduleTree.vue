@@ -1,12 +1,17 @@
 <template>
   <div>
-    <a-input
-      v-model:model-value="moduleKeyword"
-      :placeholder="t('caseManagement.caseReview.folderSearchPlaceholder')"
-      allow-clear
-      class="mb-[16px]"
-      :max-length="255"
-    />
+    <div class="mb-[16px] flex justify-between">
+      <a-input
+        v-model:model-value="moduleKeyword"
+        :placeholder="t('caseManagement.caseReview.folderSearchPlaceholder')"
+        allow-clear
+        :max-length="255"
+      />
+      <a-button v-permission="['CASE_REVIEW:READ+ADD']" class="ml-2" type="primary" @click="emit('create')">
+        {{ t('common.newCreate') }}
+      </a-button>
+    </div>
+
     <div v-if="!props.isModal" class="folder">
       <div :class="getFolderClass('all')" @click="setActiveFolder('all')">
         <MsIcon type="icon-icon_folder_filled1" class="folder-icon" />
@@ -19,7 +24,13 @@
             <MsIcon :type="isExpandAll ? 'icon-icon_folder_collapse1' : 'icon-icon_folder_expansion1'" />
           </MsButton>
         </a-tooltip>
-        <popConfirm mode="add" :all-names="rootModulesName" parent-id="NONE" @add-finish="() => initModules()">
+        <popConfirm
+          v-if="hasAnyPermission(['CASE_REVIEW:READ+UPDATE'])"
+          mode="add"
+          :all-names="rootModulesName"
+          parent-id="NONE"
+          @add-finish="() => initModules()"
+        >
           <MsButton type="icon" class="!mr-0 p-[2px]">
             <MsIcon
               type="icon-icon_create_planarity"
@@ -58,16 +69,16 @@
       >
         <template #title="nodeData">
           <div class="inline-flex w-full">
-            <div class="one-line-text w-[calc(100%-32px)] text-[var(--color-text-1)]">{{ nodeData.name }}</div>
-            <div v-if="!props.isModal" class="ms-tree-node-count ml-[4px] text-[var(--color-text-4)]"
-              >({{ nodeData.count || 0 }})</div
-            >
+            <div class="one-line-text w-full text-[var(--color-text-1)]">{{ nodeData.name }}</div>
+            <div v-if="!props.isModal" class="ms-tree-node-count ml-[4px] text-[var(--color-text-brand)]">
+              {{ nodeData.count || 0 }}
+            </div>
           </div>
         </template>
         <template v-if="!props.isModal" #extra="nodeData">
           <!-- 默认模块的 id 是root，默认模块不可编辑、不可添加子模块 -->
           <popConfirm
-            v-if="nodeData.id !== 'root' && hasAnyPermission(['CASE_REVIEW:READ+DELETE'])"
+            v-if="nodeData.id !== 'root' && hasAnyPermission(['CASE_REVIEW:READ+ADD'])"
             mode="add"
             :all-names="(nodeData.children || []).map((e: ModuleTreeNode) => e.name || '')"
             :parent-id="nodeData.id"
@@ -121,7 +132,7 @@
     modulesCount?: Record<string, number>; // 模块数量统计对象
     isExpandAll?: boolean; // 是否展开所有节点
   }>();
-  const emit = defineEmits(['init', 'folderNodeSelect']);
+  const emit = defineEmits(['init', 'folderNodeSelect', 'create']);
 
   const appStore = useAppStore();
   const { t } = useI18n();

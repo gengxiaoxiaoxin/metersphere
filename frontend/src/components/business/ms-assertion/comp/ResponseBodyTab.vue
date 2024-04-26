@@ -16,7 +16,7 @@
         :selectable="true"
         :response="props.response"
         :columns="jsonPathColumns"
-        :scroll="{ minWidth: '700px' }"
+        :scroll="{ minWidth: '100%' }"
         :default-param-item="jsonPathDefaultParamItem"
         @change="(data:any[],isInit?: boolean) => handleChange(data, ResponseBodyAssertionType.JSON_PATH,isInit)"
         @more-action-select="(e,r)=> handleExtractParamMoreActionSelect(e,r as ExpressionConfig)"
@@ -123,8 +123,8 @@
         :disabled-except-param="props.disabled"
         :selectable="true"
         :columns="xPathColumns"
-        :scroll="{ minWidth: '700px' }"
-        :default-param-item="xPathDefaultParamItem"
+        :scroll="{ minWidth: '100%' }"
+        :default-param-item="defaultAssertParamsItem"
         @change="(data:any[],isInit?: boolean) => handleChange(data, ResponseBodyAssertionType.XPATH,isInit)"
         @more-action-select="(e,r)=> handleExtractParamMoreActionSelect(e,r as ExpressionConfig)"
       >
@@ -220,9 +220,7 @@
           :disabled-except-param="props.disabled"
           :selectable="false"
           :columns="documentColumns"
-          :scroll="{
-            minWidth: '700px',
-          }"
+          :scroll="{ minWidth: '100%' }"
           :height-used="580"
           :default-param-item="documentDefaultParamItem"
           :span-method="documentSpanMethod"
@@ -272,7 +270,7 @@
         :selectable="true"
         :disabled-except-param="props.disabled"
         :columns="regexColumns"
-        :scroll="{ minWidth: '700px' }"
+        :scroll="{ minWidth: '100%' }"
         :default-param-item="regexDefaultParamItem"
         @change="(data) => handleChange(data, ResponseBodyAssertionType.REGEX)"
         @more-action-select="(e,r)=> handleExtractParamMoreActionSelect(e,r as ExpressionConfig)"
@@ -363,7 +361,7 @@
   import { TableColumnData, TableData } from '@arco-design/web-vue';
   import { cloneDeep } from 'lodash-es';
 
-  import { EQUAL, statusCodeOptions } from '@/components/pure/ms-advance-filter';
+  import { statusCodeOptions } from '@/components/pure/ms-advance-filter';
   import { ActionsItem } from '@/components/pure/ms-table-more-action/types';
   import { TableOperationColumn } from '@/components/business/ms-user-group-comp/authTable.vue';
   import fastExtraction from '@/views/api-test/components/fastExtraction/index.vue';
@@ -387,15 +385,14 @@
     RegexExtract,
     XPathExtract,
   } from '@/models/apiTest/common';
+  import { RequestExtractExpressionEnum, ResponseBodyAssertionType } from '@/enums/apiEnum';
+
   import {
-    RequestExtractEnvType,
-    RequestExtractExpressionEnum,
-    RequestExtractExpressionRuleType,
-    RequestExtractResultMatchingRule,
-    RequestExtractScope,
-    ResponseBodyAssertionType,
-    ResponseBodyXPathAssertionFormat,
-  } from '@/enums/apiEnum';
+    defaultAssertParamsItem,
+    defaultExtractParamItem,
+    jsonPathDefaultParamItem,
+    regexDefaultParamItem,
+  } from '@/views/api-test/components/config';
 
   const { t } = useI18n();
 
@@ -445,20 +442,6 @@
   // const disabledExpressionSuffix = ref(false);
   export type ExpressionConfig = (RegexExtract | JSONPathExtract | XPathExtract) & Record<string, any>;
 
-  const defaultExtractParamItem: ExpressionConfig = {
-    enable: true,
-    variableName: '',
-    variableType: RequestExtractEnvType.TEMPORARY,
-    extractScope: RequestExtractScope.BODY,
-    expression: '',
-    extractType: RequestExtractExpressionEnum.JSON_PATH,
-    expressionMatchingRule: RequestExtractExpressionRuleType.EXPRESSION,
-    resultMatchingRule: RequestExtractResultMatchingRule.RANDOM,
-    resultMatchingRuleNum: 1,
-    responseFormat: ResponseBodyXPathAssertionFormat.XML,
-    moreSettingPopoverVisible: false,
-  };
-
   const activeRecord = ref({ ...defaultExtractParamItem }); // 用于暂存当前操作的提取参数表格项
 
   const responseRadios = [
@@ -473,13 +456,13 @@
       title: 'ms.assertion.expression',
       dataIndex: 'expression',
       slotName: 'expression',
-      width: 300,
     },
     {
       title: 'ms.assertion.matchCondition',
       dataIndex: 'condition',
       slotName: 'condition',
       options: statusCodeOptions,
+      width: 150,
     },
     {
       title: 'ms.assertion.matchValue',
@@ -492,7 +475,7 @@
       title: '',
       slotName: 'operation',
       fixed: 'right',
-      width: 130,
+      width: 80,
       moreAction: [
         {
           eventTag: 'copy',
@@ -505,50 +488,6 @@
       ],
     },
   ];
-
-  // json默认值
-  const jsonPathDefaultParamItem = {
-    enable: true,
-    variableName: '',
-    variableType: RequestExtractEnvType.TEMPORARY,
-    extractScope: RequestExtractScope.BODY,
-    expression: '',
-    condition: EQUAL.value,
-    extractType: RequestExtractExpressionEnum.JSON_PATH,
-    expressionMatchingRule: RequestExtractExpressionRuleType.EXPRESSION,
-    resultMatchingRule: RequestExtractResultMatchingRule.RANDOM,
-    resultMatchingRuleNum: 1,
-    responseFormat: ResponseBodyXPathAssertionFormat.XML,
-    moreSettingPopoverVisible: false,
-  };
-  // xpath默认值
-  const xPathDefaultParamItem = {
-    expression: '',
-    enable: true,
-    valid: true,
-    variableType: RequestExtractEnvType.TEMPORARY,
-    extractScope: RequestExtractScope.BODY,
-    extractType: RequestExtractExpressionEnum.X_PATH,
-    expressionMatchingRule: RequestExtractExpressionRuleType.EXPRESSION,
-    resultMatchingRule: RequestExtractResultMatchingRule.RANDOM,
-    resultMatchingRuleNum: 1,
-    responseFormat: ResponseBodyXPathAssertionFormat.XML,
-    moreSettingPopoverVisible: false,
-  };
-  // xpath默认值
-  const regexDefaultParamItem = {
-    expression: '',
-    enable: true,
-    valid: true,
-    variableType: RequestExtractEnvType.TEMPORARY,
-    extractScope: RequestExtractScope.BODY,
-    extractType: RequestExtractExpressionEnum.REGEX,
-    expressionMatchingRule: RequestExtractExpressionRuleType.EXPRESSION,
-    resultMatchingRule: RequestExtractResultMatchingRule.RANDOM,
-    resultMatchingRuleNum: 1,
-    responseFormat: ResponseBodyXPathAssertionFormat.XML,
-    moreSettingPopoverVisible: false,
-  };
 
   const handleChange = (data: any[], type: string, isInit?: boolean) => {
     switch (type) {
@@ -919,10 +858,10 @@
         parent.rowSpan = parent.rowSpan ? parent.rowSpan + 1 : 2;
       } else {
         // 找到第一个子节点
-        const fisrtChildNode = findFirstByGroupId(condition.value.documentAssertion.jsonAssertion, record.groupId);
-        if (fisrtChildNode) {
-          fisrtChildNode.rowSpan = fisrtChildNode.rowSpan
-            ? fisrtChildNode.rowSpan + 1
+        const firstChildNode = findFirstByGroupId(condition.value.documentAssertion.jsonAssertion, record.groupId);
+        if (firstChildNode) {
+          firstChildNode.rowSpan = firstChildNode.rowSpan
+            ? firstChildNode.rowSpan + 1
             : countNodesByGroupId(condition.value.documentAssertion.jsonAssertion, record.groupId) + 1;
         }
       }

@@ -9,7 +9,7 @@
     :ok-loading="props.confirmLoading"
     :mask-closable="false"
     save-continue-text="project.commonScript.saveAsDraft"
-    ok-text="project.commonScript.apply"
+    :ok-text="form.id ? t('common.update') : t('common.create')"
     @confirm="handleDrawerConfirm"
     @cancel="handleDrawerCancel"
   >
@@ -136,7 +136,7 @@
     result: '',
   };
 
-  const form = ref({ ...initForm });
+  const form = ref({ ...cloneDeep(initForm) });
 
   const columns: MsTableColumn = [
     {
@@ -209,8 +209,8 @@
   }
 
   function handleDrawerCancel() {
-    emit('close');
     reset();
+    emit('close');
   }
 
   const editScriptId = ref<string | undefined>('');
@@ -243,7 +243,7 @@
     () => showScriptDrawer.value,
     (val) => {
       if (val) {
-        form.value = { ...initForm };
+        form.value = { ...cloneDeep(initForm) };
         innerParams.value = [];
         editScriptId.value = props.scriptId;
         if (editScriptId.value) {

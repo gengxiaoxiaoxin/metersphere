@@ -23,7 +23,7 @@
             type="primary"
             @click="handleSelect('newApi')"
           >
-            {{ t('apiTestManagement.newApi') }}
+            {{ t('common.newCreate') }}
             <template #icon>
               <icon-down />
             </template>
@@ -117,7 +117,6 @@
         :filter-more-action-func="filterMoreActionFunc"
         :allow-drop="allowDrop"
         block-node
-        title-tooltip-position="left"
         @select="folderNodeSelect"
         @more-action-select="handleFolderMoreSelect"
         @more-actions-close="moreActionsClose"
@@ -126,13 +125,13 @@
         <template #title="nodeData">
           <div v-if="nodeData.type === 'API'" class="inline-flex w-full cursor-pointer gap-[4px]">
             <apiMethodName :method="nodeData.attachInfo?.method || nodeData.attachInfo?.protocol" />
-            <div class="one-line-text w-[calc(100%-32px)] text-[var(--color-text-1)]">{{ nodeData.name }}</div>
+            <div class="one-line-text w-full text-[var(--color-text-1)]">{{ nodeData.name }}</div>
           </div>
           <div v-else :id="nodeData.id" class="inline-flex w-full">
-            <div class="one-line-text w-[calc(100%-32px)] text-[var(--color-text-1)]">{{ nodeData.name }}</div>
-            <div v-if="!props.isModal" class="ms-tree-node-count ml-[4px] text-[var(--color-text-4)]"
-              >({{ modulesCount[nodeData.id] || 0 }})</div
-            >
+            <div class="one-line-text w-full text-[var(--color-text-1)]">{{ nodeData.name }}</div>
+            <div v-if="!props.isModal" class="ms-tree-node-count ml-[4px] text-[var(--color-text-brand)]">
+              {{ modulesCount[nodeData.id] || 0 }}
+            </div>
           </div>
         </template>
         <template v-if="!props.readOnly && !props.isModal" #extra="nodeData">
@@ -163,7 +162,7 @@
             @close="resetFocusNodeKey"
             @rename-finish="handleRenameFinish"
           >
-            <span :id="`renameSpan${nodeData.id}`" class="relative"></span>
+            <div :id="`renameSpan${nodeData.id}`" class="relative h-full"></div>
           </popConfirm>
         </template>
       </MsTree>
@@ -203,7 +202,7 @@
   import { useI18n } from '@/hooks/useI18n';
   import useModal from '@/hooks/useModal';
   import useAppStore from '@/store/modules/app';
-  import { mapTree } from '@/utils';
+  import { characterLimit, mapTree } from '@/utils';
   import { hasAllPermission, hasAnyPermission } from '@/utils/permission';
 
   import { ApiDefinitionGetModuleParams } from '@/models/apiTest/management';
@@ -396,6 +395,22 @@
   }
 
   /**
+   * 处理文件夹树节点选中事件
+   */
+  function folderNodeSelect(_selectedKeys: (string | number)[], node: MsTreeNodeData) {
+    if (node.type === 'MODULE') {
+      const offspringIds: string[] = [];
+      mapTree(node.children || [], (e) => {
+        offspringIds.push(e.id);
+        return e;
+      });
+      emit('folderNodeSelect', _selectedKeys, offspringIds);
+    } else if (node.type === 'API') {
+      emit('clickApiNode', node);
+    }
+  }
+
+  /**
    * 初始化模块树
    * @param isSetDefaultKey 是否设置第一个节点为选中节点
    */
@@ -450,6 +465,9 @@
             path: e.path,
             fullPath,
           };
+          if (!isSetDefaultKey && e.id === selectedKeys.value[0]) {
+            folderNodeSelect([selectedKeys.value[0]], e);
+          }
           return {
             ...e,
             hideMoreAction: e.id === 'root',
@@ -493,22 +511,6 @@
   }
 
   /**
-   * 处理文件夹树节点选中事件
-   */
-  function folderNodeSelect(_selectedKeys: (string | number)[], node: MsTreeNodeData) {
-    if (node.type === 'MODULE') {
-      const offspringIds: string[] = [];
-      mapTree(node.children || [], (e) => {
-        offspringIds.push(e.id);
-        return e;
-      });
-      emit('folderNodeSelect', _selectedKeys, offspringIds);
-    } else if (node.type === 'API') {
-      emit('clickApiNode', node);
-    }
-  }
-
-  /**
    * 删除文件夹
    * @param node 节点信息
    */
@@ -517,8 +519,8 @@
       type: 'error',
       title:
         node.type === 'API'
-          ? t('apiTestDebug.deleteDebugTipTitle', { name: node.name })
-          : t('apiTestDebug.deleteFolderTipTitle', { name: node.name }),
+          ? t('apiTestDebug.deleteDebugTipTitle', { name: characterLimit(node.name) })
+          : t('apiTestDebug.deleteFolderTipTitle', { name: characterLimit(node.name) }),
       content: node.type === 'API' ? t('apiTestDebug.deleteDebugTipContent') : t('apiTestDebug.deleteFolderTipContent'),
       okText: t('apiTestDebug.deleteConfirm'),
       okButtonProps: {
@@ -670,8 +672,8 @@
     initModules();
   });
 
-  function refresh() {
-    initModules();
+  async function refresh() {
+    await initModules();
   }
 
   defineExpose({

@@ -1,6 +1,6 @@
 <template>
   <div class="px-[16px]">
-    <div class="mb-4 flex items-center justify-between">
+    <div class="mb-[8px] flex items-center justify-between">
       <a-radio-group v-model:model-value="showType" type="button" class="file-show-type" @change="changeShowType">
         <a-radio value="All">{{ t('report.all') }}</a-radio>
         <a-radio value="INDEPENDENT">{{ t('report.independent') }}</a-radio>
@@ -73,7 +73,11 @@
           <template #content>
             <div class="arco-table-filters-content">
               <div class="ml-[6px] flex items-center justify-start px-[6px] py-[2px]">
-                <a-checkbox-group v-model:model-value="triggerModeListFilters" direction="vertical" size="small">
+                <a-checkbox-group
+                  v-model:model-value="triggerModeListFiltersMaps[showType]"
+                  direction="vertical"
+                  size="small"
+                >
                   <a-checkbox v-for="(key, value) of TriggerModeLabel" :key="key" :value="value">
                     <div class="font-medium">{{ t(key) }}</div>
                   </a-checkbox>
@@ -328,7 +332,8 @@
       },
       showSetting: true,
       selectable: hasAnyPermission(['PROJECT_API_REPORT:READ+DELETE']),
-      heightUsed: 330,
+      heightUsed: 256,
+      paginationSize: 'mini',
       showSelectorAll: true,
     },
     (item) => ({
@@ -346,6 +351,15 @@
     All: allListFilters.value,
     INDEPENDENT: independentListFilters.value,
     INTEGRATED: integratedListFilters.value,
+  });
+
+  const allTriggerModeFilters = ref<string[]>([]);
+  const independentTriggerModeFilters = ref<string[]>([]);
+  const integratedTriggerModeFilters = ref<string[]>([]);
+  const triggerModeListFiltersMaps = ref<Record<string, string[]>>({
+    All: allTriggerModeFilters.value,
+    INDEPENDENT: independentTriggerModeFilters.value,
+    INTEGRATED: integratedTriggerModeFilters.value,
   });
   // 全部过滤条件
   const allIntegratedFilters = ref<string[]>([]);
@@ -392,7 +406,7 @@
       filter: {
         status: statusListFiltersMap.value[showType.value],
         integrated: integratedFilters.value,
-        triggerMode: triggerModeListFilters.value,
+        triggerMode: triggerModeListFiltersMaps.value[showType.value],
       },
     });
     loadList();
@@ -560,7 +574,7 @@
 
   function showDetail() {
     if ((route.query.reportId || route.query.id) && route.query.type) {
-      activeDetailId.value = route.query.reportId as string;
+      activeDetailId.value = (route.query.reportId as string) || (route.query.id as string);
       activeReportIndex.value = 0;
       if (route.query.type === 'API_SCENARIO') {
         showDetailDrawer.value = true;
@@ -575,6 +589,14 @@
     getTime();
   });
 
+  onBeforeUnmount(() => {
+    if (route.query.type === 'API_SCENARIO') {
+      showDetailDrawer.value = false;
+    } else {
+      showCaseDetailDrawer.value = false;
+    }
+  });
+
   watch(
     () => props.moduleType,
     (val) => {
@@ -586,4 +608,6 @@
   );
 </script>
 
-<style scoped></style>
+<style lang="less" scoped>
+  .ms-table--special-small();
+</style>

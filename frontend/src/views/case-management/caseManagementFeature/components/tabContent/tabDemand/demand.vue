@@ -3,7 +3,7 @@
     <div class="mb-4 flex items-center justify-between">
       <div>
         <a-button
-          v-if="platformInfo.platform_key"
+          v-if="caseEnable"
           v-permission="['FUNCTIONAL_CASE:READ+ADD', 'FUNCTIONAL_CASE:READ+UPDATE', 'FUNCTIONAL_CASE:READ+DELETE']"
           type="primary"
           @click="associatedDemand"
@@ -27,12 +27,14 @@
         class="mx-[8px] w-[240px]"
         @search="searchList"
         @press-enter="searchList"
+        @clear="searchList"
       ></a-input-search>
     </div>
     <AssociatedDemandTable
       ref="demandRef"
       :fun-params="{ caseId: props.caseId, keyword, projectId: currentProjectId }"
       :show-empty="true"
+      :case-enable="caseEnable"
       @update="updateDemand"
       @create="addDemand"
       @cancel="cancelLink"
@@ -74,6 +76,7 @@
           class="mx-[8px] w-[240px]"
           @search="searchHandler"
           @press-enter="searchHandler"
+          @clear="searchHandler"
         ></a-input-search>
       </div>
       <ms-base-table ref="tableRef" v-bind="propsRes" v-on="propsEvent">
@@ -119,14 +122,12 @@
   import { getCaseRelatedInfo } from '@/api/modules/project-management/menuManagement';
   import { useI18n } from '@/hooks/useI18n';
   import { useAppStore } from '@/store';
-  import useFeatureCaseStore from '@/store/modules/case/featureCase';
 
   import type { CreateOrUpdateDemand, DemandItem } from '@/models/caseManagement/featureCase';
   import { TableKeyEnum } from '@/enums/tableEnum';
 
   const { t } = useI18n();
   const appStore = useAppStore();
-  const featureCaseStore = useFeatureCaseStore();
   const currentProjectId = computed(() => appStore.currentProjectId);
   const props = defineProps<{
     caseId: string;
@@ -140,6 +141,8 @@
   }, 100);
 
   const showAddModel = ref<boolean>(false);
+
+  const caseEnable = ref<boolean>(false);
 
   const initModelForm: DemandItem = {
     id: '',
@@ -350,6 +353,7 @@
       const result = await getCaseRelatedInfo(currentProjectId.value);
       if (result && result.platform_key) {
         platformInfo.value = { ...result };
+        caseEnable.value = platformInfo.value.case_enable !== 'false';
       }
     } catch (error) {
       console.log(error);

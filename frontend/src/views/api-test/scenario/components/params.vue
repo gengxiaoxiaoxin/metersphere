@@ -1,6 +1,6 @@
 <template>
   <div class="history-container">
-    <a-alert v-if="isShowTip" :show-icon="true" class="mb-[16px]" type="info">
+    <a-alert v-if="isShowTip" :show-icon="true" class="mb-[8px]" type="info">
       {{ t('apiScenario.params.priority') }}
     </a-alert>
   </div>
@@ -9,7 +9,7 @@
       <a-radio value="convention">{{ t('apiScenario.params.convention') }}</a-radio>
     </a-radio-group>
   </div>-->
-  <div class="mb-[16px] flex items-center justify-between">
+  <div class="mb-[8px] flex items-center justify-between">
     <a-input-search
       v-model="searchValue"
       :placeholder="t('apiScenario.params.searchPlaceholder')"
@@ -17,12 +17,7 @@
       class="mr-[8px] w-[240px]"
       @search="handleSearch"
       @press-enter="handleSearch"
-    />
-    <batchAddKeyVal
-      :params="innerParams"
-      :default-param-item="defaultParamItem"
-      no-param-type
-      @apply="handleBatchParamApply"
+      @clear="handleSearch"
     />
   </div>
   <paramTable
@@ -31,6 +26,14 @@
     :default-param-item="defaultParamItem"
     draggable
     @change="handleParamTableChange"
+    @batch-add="batchAddKeyValVisible = true"
+  />
+  <batchAddKeyVal
+    v-model:visible="batchAddKeyValVisible"
+    :params="innerParams"
+    :default-param-item="defaultParamItem"
+    no-param-type
+    @apply="handleBatchParamApply"
   />
 </template>
 
@@ -60,6 +63,7 @@
   const searchValue = ref('');
   const firstSearch = ref(true);
   const backupParams = ref(props.params);
+  const batchAddKeyValVisible = ref(false);
 
   const defaultParamItem = {
     key: '',
@@ -91,6 +95,7 @@
           value: 'LIST',
         },
       ],
+      width: 150,
       titleSlotName: 'typeTitle',
       typeTitleTooltip: t('apiScenario.params.typeTooltip'),
     },
@@ -113,8 +118,9 @@
     {
       title: '',
       slotName: 'operation',
+      titleSlotName: 'batchAddTitle',
       dataIndex: 'operation',
-      width: 50,
+      width: 70,
     },
   ];
 

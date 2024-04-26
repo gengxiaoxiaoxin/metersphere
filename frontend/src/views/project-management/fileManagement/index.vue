@@ -2,7 +2,7 @@
   <div class="page">
     <MsSplitBox>
       <template #first>
-        <div class="p-[24px]">
+        <div class="p-[16px]">
           <div class="folder" @click="setActiveFolder('my')">
             <div :class="getFolderClass('my')">
               <MsIcon type="icon-icon_folder_filled1" class="folder-icon" />
@@ -254,10 +254,9 @@
 
 <style lang="less" scoped>
   .page {
-    @apply bg-white;
+    @apply h-full bg-white;
 
     min-width: 1000px;
-    height: calc(100vh - 76px);
     border-radius: var(--border-radius-large);
     .folder {
       @apply flex cursor-pointer items-center justify-between;

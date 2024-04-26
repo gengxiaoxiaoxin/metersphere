@@ -135,6 +135,7 @@
           v-model:status-filters="createUserFilters"
           :title="(columnConfig.title as string)"
           :list="memberOptions"
+          label-key="label"
           @search="loadApiList(false)"
         >
           <template #item="{ item }">
@@ -409,6 +410,7 @@
       },
       fixed: 'left',
       width: 100,
+      columnSelectorDisabled: true,
     },
     {
       title: 'apiTestManagement.apiName',
@@ -419,6 +421,7 @@
         sorter: true,
       },
       width: 200,
+      columnSelectorDisabled: true,
     },
     {
       title: 'apiTestManagement.apiType',
@@ -612,7 +615,7 @@
     () => props.refreshTimeStamp,
     (val) => {
       if (val) {
-        loadApiList(false);
+        loadApiList(true);
       }
     }
   );
@@ -621,7 +624,7 @@
     () => props.activeModule,
     () => {
       resetSelector();
-      loadApiList(false);
+      loadApiList(true);
     }
   );
 

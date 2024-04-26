@@ -9,6 +9,7 @@
           class="mr-[8px] w-[240px]"
           @search="loadApiList(false)"
           @press-enter="loadApiList(false)"
+          @clear="loadApiList(false)"
         />
         <a-button type="outline" class="arco-btn-outline--secondary !p-[8px]" @click="loadApiList(false)">
           <template #icon>
@@ -112,14 +113,23 @@
         <apiStatus :status="record.status" />
       </template>
       <template #action="{ record }">
-        <MsButton type="text" class="!mr-0" @click="recover(record)">
+        <MsButton
+          v-permission="['PROJECT_API_DEFINITION:READ+DELETE']"
+          type="text"
+          class="!mr-0"
+          @click="recover(record)"
+        >
           {{ t('apiTestManagement.recycle.batchRecover') }}
         </MsButton>
-        <a-divider direction="vertical" :margin="8"></a-divider>
-        <MsButton type="text" class="!mr-0" @click="cleanOut(record)">
+        <a-divider v-permission="['PROJECT_API_DEFINITION:READ+DELETE']" direction="vertical" :margin="8"></a-divider>
+        <MsButton
+          v-permission="['PROJECT_API_DEFINITION:READ+DELETE']"
+          type="text"
+          class="!mr-0"
+          @click="cleanOut(record)"
+        >
           {{ t('apiTestManagement.recycle.batchCleanOut') }}
         </MsButton>
-        <a-divider direction="vertical" :margin="8"></a-divider>
       </template>
     </ms-base-table>
   </div>
@@ -188,6 +198,7 @@
         sorter: true,
       },
       fixed: 'left',
+      columnSelectorDisabled: true,
       width: 100,
     },
     {
@@ -199,6 +210,7 @@
         sorter: true,
       },
       width: 200,
+      columnSelectorDisabled: true,
     },
     {
       title: 'apiTestManagement.apiType',
@@ -282,11 +294,12 @@
       {
         label: 'apiTestManagement.recycle.batchRecover',
         eventTag: 'batchRecover',
-        // permission: ['FUNCTIONAL_CASE:READ+DELETE'],
+        permission: ['PROJECT_API_DEFINITION:READ+DELETE'],
       },
       {
         label: 'apiTestManagement.recycle.batchCleanOut',
         eventTag: 'batchCleanOut',
+        permission: ['PROJECT_API_DEFINITION:READ+DELETE'],
       },
     ],
   };
@@ -297,12 +310,7 @@
   const statusFilters = ref<string[]>([]);
   const deleteUserFilterVisible = ref(false);
   const deleteUserFilters = ref<string[]>([]);
-  const moduleIds = computed(() => {
-    if (props.activeModule === 'all') {
-      return [];
-    }
-    return [props.activeModule];
-  });
+
   const tableQueryParams = ref<any>();
   const tableStore = useTableStore();
   async function getModuleIds() {
@@ -483,7 +491,8 @@
       },
       onBeforeOk: async () => {
         try {
-          await batchCleanOutDefinition(await getBatchParams());
+          console.log(getBatchParams(), ' getBatchParams() getBatchParams()');
+          // await batchCleanOutDefinition(await getBatchParams());
           Message.success(t('common.deleteSuccess'));
           resetSelector();
           loadApiList(true);

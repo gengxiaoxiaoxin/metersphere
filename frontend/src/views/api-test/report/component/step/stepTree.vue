@@ -165,17 +165,19 @@
             </div>
             <!-- 折叠展开内容 -->
             <div v-if="showResContent(step)" class="foldContent mt-4 pl-2">
-              <StepDetailContent
-                :mode="props.activeType"
-                :step-item="step"
-                :console="props.console"
-                :is-definition="true"
-                :environment-name="props.environmentName"
-                :show-type="props.showType"
-                :is-response-model="true"
-                :report-id="props?.reportId"
-                :steps="steps"
-              />
+              <Suspense>
+                <StepDetailContent
+                  :mode="props.activeType"
+                  :step-item="step"
+                  :console="props.console"
+                  :is-definition="true"
+                  :environment-name="props.environmentName"
+                  :show-type="props.showType"
+                  :is-response-model="true"
+                  :report-id="props?.reportId"
+                  :steps="steps"
+                />
+              </Suspense>
             </div>
           </div>
         </template>
@@ -499,6 +501,9 @@
   }
   .foldContent {
     height: 100%;
-    height: calc(100vh);
+    height: 1000px;
+  }
+  :deep(.step-tree-node-title) {
+    width: 100%;
   }
 </style>

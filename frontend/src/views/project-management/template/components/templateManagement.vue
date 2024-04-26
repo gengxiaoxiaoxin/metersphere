@@ -28,6 +28,7 @@
         allow-clear
         @search="searchFiled"
         @press-enter="searchFiled"
+        @clear="searchFiled"
       ></a-input-search>
     </div>
     <MsBaseTable v-bind="propsRes" ref="tableRef" v-on="propsEvent">
@@ -417,6 +418,10 @@
     }
   });
 
+  onBeforeUnmount(() => {
+    showDetailVisible.value = false;
+  });
+
   onMounted(() => {
     fetchData();
     updateColumns();
@@ -432,7 +437,9 @@
 
 <style scoped lang="less">
   .system-flag {
+    font-size: 12px;
     background: var(--color-text-n8);
-    @apply ml-2 rounded p-1 text-xs;
+    line-height: 20px;
+    @apply ml-2 rounded p-1;
   }
 </style>

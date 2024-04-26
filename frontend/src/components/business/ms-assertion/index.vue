@@ -9,15 +9,18 @@
           </div>
         </a-button>
         <template #content>
-          <a-doption v-for="item in assertOptionSource" :key="item.value" :value="item.value">{{
-            item.label
-          }}</a-doption>
+          <a-doption v-for="item in assertOptionSource" :key="item.value" :value="item.value">
+            {{ item.label }}
+          </a-doption>
         </template>
       </a-dropdown>
       <div v-if="props.isDefinition && innerConfig" class="flex items-center">
         <a-switch v-model:model-value="innerConfig.enableGlobal" :disabled="props.disabled" size="small" type="line" />
         <div class="ml-[8px] text-[var(--color-text-1)]">{{ t('ms.assertion.openGlobal') }}</div>
-        <a-tooltip :content="t('ms.assertion.openGlobalTip')" position="left">
+        <a-tooltip
+          :content="innerConfig.enableGlobal ? t('ms.assertion.openGlobalTip') : t('ms.assertion.closeGlobalTip')"
+          position="left"
+        >
           <icon-question-circle
             class="ml-[4px] text-[var(--color-text-brand)] hover:text-[rgb(var(--primary-5))]"
             size="16"
@@ -85,6 +88,7 @@
           :style="{
             overflow: 'auto',
             height: '100%',
+            width: '100%',
           }"
         >
           <!-- 响应头 -->
@@ -131,6 +135,7 @@
           v-if="getCurrentItemState.assertionType === ResponseAssertionType.SCRIPT"
           v-model:data="getCurrentItemState"
           :disabled="props.disabled"
+          :script-code-editor-height="props.scriptCodeEditorHeight"
           @change="handleChange"
           @delete-script-item="deleteScriptItem"
           @copy="copyItem"
@@ -188,6 +193,7 @@
     response?: string; // 响应内容
     disabled?: boolean; // 是否禁用
     showExtraction?: boolean; // 是否显示提取
+    scriptCodeEditorHeight?: string; // 脚本的高度
   }>();
 
   const emit = defineEmits<{
@@ -442,6 +448,7 @@
       default:
         break;
     }
+    emit('change');
   };
 
   watchEffect(() => {
@@ -454,11 +461,11 @@
 <style lang="less" scoped>
   .ms-assertion {
     width: 100%;
-    height: calc(100% - 22px);
+    height: 100%;
     &-body {
       display: flex;
       margin-top: 8px;
-      height: calc(100% - 42px);
+      height: calc(100% - 52px);
       flex-flow: row nowrap;
       gap: 8px;
       &-left {
@@ -528,6 +535,7 @@
       }
       &-right {
         display: flex;
+        flex: 1;
         flex-grow: 1;
         border-radius: 4px;
         background: var(--color-text-fff);

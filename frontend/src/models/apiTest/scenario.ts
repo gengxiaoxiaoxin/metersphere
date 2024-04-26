@@ -1,3 +1,4 @@
+import { BatchActionQueryParams } from '@/components/pure/ms-table/type';
 import type { CaseLevel } from '@/components/business/ms-case-associate/types';
 
 import { ApiDefinitionCustomField, ApiRunModeRequest } from '@/models/apiTest/management';
@@ -78,6 +79,8 @@ export interface ApiScenarioTableItem {
   deleteUser: string;
   deleteTime: number;
   deleted: boolean;
+  environmentId: string;
+  environmentName: string;
   createUserName: string;
   updateUserName: string;
   deleteUserName: string;
@@ -170,6 +173,10 @@ export interface ApiScenarioBatchDeleteParams extends ApiScenarioBatchParams {
 // 场景-执行历史-请求参数
 export interface ExecutePageParams extends TableQueryParams {
   id: string;
+}
+
+export interface ApiScenarioBatchParam extends BatchActionQueryParams {
+  moduleIds: string[];
 }
 
 // 场景-执行历史-请求参数
